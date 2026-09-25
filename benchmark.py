@@ -119,11 +119,11 @@ def ensure_setup(names: list[str]) -> None:
     if "hermesagent_20" in names and not (hermes / "dist" / "lib" / "benchmark.js").is_file():
         raise FileNotFoundError("bundled Hermes runtime is missing")
     if "aider_polyglot_225" in names and not image_id(AIDER_IMAGE):
-        command([docker, "build", "-t", AIDER_IMAGE, "-f",
+        command([docker, "build", "--network", "host", "-t", AIDER_IMAGE, "-f",
                  str(VENDOR / "aider" / "benchmark" / "Dockerfile.contested"),
                  str(VENDOR / "aider")])
     if "hermesagent_20" in names and not image_id(HERMES_IMAGE):
-        command([docker, "build", "-t", HERMES_IMAGE, "-f",
+        command([docker, "build", "--network", "host", "-t", HERMES_IMAGE, "-f",
                  str(hermes / "verification" / "Dockerfile"),
                  str(hermes / "verification")])
 
