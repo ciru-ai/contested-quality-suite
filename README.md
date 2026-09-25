@@ -17,6 +17,7 @@ That command installs its small Python dependencies on first use, runs the 54 ca
 ```
 
 The full run writes `runs/<run-id>/score.json`. The optional Aider, Hermes, and Terminal cases use bundled tasks and their native agent graders. Their Docker images consume substantially more disk space; see [SIZE_REPORT.md](SIZE_REPORT.md). Model weights and an inference server are not included. Terminal setup checks that Docker has at least 12 GiB free before starting its task images. If `/v1/models` does not advertise context length, pass the model's real capacity with `--terminal-context-length N`.
+On NixOS, the Terminal launcher locates the host GCC C++ runtime for Harbor's native Python extensions.
 
 For four concurrent agent tasks in each agent-based component, use `./benchmark --all --aider-threads 4 --hermes-workers 4 --terminal-concurrency 4 --tool-parallel 4`. The text and coding components run their selected questions in order. Only set agent concurrency to a value the model server can support.
 
