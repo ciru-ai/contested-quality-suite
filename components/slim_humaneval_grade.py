@@ -71,15 +71,26 @@ def sandbox_command(script: Path) -> list[str]:
     bwrap = shutil.which("bwrap")
     if not bwrap:
         raise RuntimeError("Bubblewrap (bwrap) is required to grade model-generated Python")
-    command = [bwrap, "--unshare-all", "--die-with-parent", "--new-session"]
+    interpreter = Path(sys.executable).resolve()
+    if not interpreter.is_file():
+        raise RuntimeError(f"Python interpreter is unavailable: {interpreter}")
+    command = [bwrap, "--unshare-all", "--die-with-parent", "--new-session",
+               "--clearenv", "--setenv", "PYTHONNOUSERSITE", "1",
+               "--setenv", "PYTHONDONTWRITEBYTECODE", "1"]
     for root in ("/usr", "/lib", "/lib64", "/bin"):
         if Path(root).exists():
             command += ["--ro-bind", root, root]
     if Path("/nix/store").exists():
         command += ["--ro-bind", "/nix/store", "/nix/store"]
+    bound_roots = [Path(root) for root in ("/usr", "/lib", "/lib64", "/bin", "/nix/store")]
+    if not any(interpreter.is_relative_to(root) for root in bound_roots):
+        prefix = Path(sys.base_prefix).resolve()
+        if not interpreter.is_relative_to(prefix):
+            raise RuntimeError(f"Python interpreter is outside its installation prefix: {interpreter}")
+        command += ["--ro-bind", str(prefix), str(prefix)]
     command += ["--dir", "/app", "--ro-bind", str(script), "/app/grade.py",
                 "--proc", "/proc", "--dev", "/dev", "--tmpfs", "/tmp",
-                "/usr/bin/python3", "/app/grade.py", "--worker"]
+                str(interpreter), "/app/grade.py", "--worker"]
     return command
 
 

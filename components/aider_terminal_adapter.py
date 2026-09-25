@@ -209,7 +209,7 @@ def _build_aider_steps(cfg: dict[str, Any], root: Path, run_dir: Path) -> list[d
         raise AdapterError("Aider model must be the native openai/<served-id> value")
     if not d["endpoint"].startswith(("http://", "https://")):
         raise AdapterError("Aider endpoint must be an HTTP(S) OpenAI-compatible base URL")
-    threads = cfg.get("threads", 8)
+    threads = cfg.get("threads", 1)
     if type(threads) is not int or threads < 1:
         raise AdapterError("Aider threads must be a positive integer")
     if cfg.get("authenticated"):
@@ -277,6 +277,14 @@ def _build_terminal_steps(cfg: dict[str, Any], root: Path, run_dir: Path) -> lis
     endpoint = _required(cfg, "endpoint")
     model = _required(cfg, "model")
     common = ["--suite", str(suite), "--tier", "full", "--endpoint", endpoint, "--model", model]
+    context_length = cfg.get("context_length")
+    if context_length is not None:
+        if type(context_length) is not int or context_length < 1:
+            raise AdapterError("Terminal context_length must be a positive integer")
+        common.extend(["--context-length", str(context_length)])
+    max_output_tokens = cfg.get("max_output_tokens", 8192)
+    if type(max_output_tokens) is not int or max_output_tokens < 1:
+        raise AdapterError("Terminal max_output_tokens must be a positive integer")
     doctor = [str(runner), "doctor", *common]
     output = Path(cfg.get("output_dir") or run_dir / TERMINAL / "results").expanduser().resolve()
     run_id = run_dir.name
@@ -287,6 +295,7 @@ def _build_terminal_steps(cfg: dict[str, Any], root: Path, run_dir: Path) -> lis
         raise AdapterError("Terminal native job name exceeds 220 characters")
     command = [
         str(runner), "run", *common,
+        "--max-output-tokens", str(max_output_tokens),
         "--platform", _required(cfg, "platform"),
         "--model-name", _required(cfg, "model_name"),
         "--engine", _required(cfg, "engine"),
@@ -307,7 +316,9 @@ def _build_terminal_steps(cfg: dict[str, Any], root: Path, run_dir: Path) -> lis
             command.extend([flag, str(cfg[key])])
     guarded = [sys.executable, "-c", _TERMINAL_RUN_GUARD,
                str(workdir / "jobs" / job_name), *command]
-    return [_step("terminal-doctor", doctor, workdir),
+    storage = [sys.executable, str(root / "components" / "terminal_storage_preflight.py")]
+    return [_step("terminal-storage-preflight", storage),
+            _step("terminal-doctor", doctor, workdir),
             _step("terminal-run", guarded, workdir)]
 
 
@@ -392,7 +403,8 @@ def _terminal_model_dirs(base: Path) -> list[Path]:
     return sorted(path.parent for path in base.rglob("summary.json") if path.is_file())
 
 
-def _validate_terminal_task(raw: dict[str, Any], case_id: str, content_sha256: str, path: Path) -> bool:
+def _validate_terminal_task(raw: dict[str, Any], case_id: str, content_sha256: str,
+                            path: Path, expected_output_cap: int | None = None) -> bool:
     """Validate one native task export and return its pass@2 grade."""
     if raw.get("task") != case_id:
         raise AdapterError(f"Terminal task ID mismatch: {path}")
@@ -402,9 +414,23 @@ def _validate_terminal_task(raw: dict[str, Any], case_id: str, content_sha256: s
     attempts = raw.get("attempts")
     if not isinstance(attempts, list) or not (1 <= len(attempts) <= 2):
         raise AdapterError(f"Terminal pass@2 attempts missing or excessive: {path}")
+    if expected_output_cap is not None:
+        profile_cap = ((raw.get("evaluation_profile") or {}).get("agent") or {}).get("max_output_tokens")
+        if profile_cap != expected_output_cap:
+            raise AdapterError(f"Terminal output cap differs from the current protocol: {path}")
+        if any((attempt.get("generation") or {}).get("max_output_tokens") != expected_output_cap
+               for attempt in attempts):
+            raise AdapterError(f"Terminal attempt output metadata missing or mismatched: {path}")
+        if any(type((attempt.get("generation") or {}).get("output_limit_hits")) is not int
+               for attempt in attempts):
+            raise AdapterError(f"Terminal attempt output-limit diagnostics missing: {path}")
+        if any((attempt.get("generation") or {}).get("output_limit_hits", 0) > 0
+               for attempt in attempts):
+            raise AdapterError(f"Terminal response reached its output cap (non-scorable): {case_id}")
     exception_types = [(item.get("exception") or {}).get("exception_type") for item in attempts]
     if any(kind not in (None, "AgentTimeoutError") for kind in exception_types):
-        raise AdapterError(f"Terminal task has a non-scorable agent or harness exception: {path}")
+        raise AdapterError(f"Terminal infrastructure or agent setup exception (non-scorable): "
+                           f"{case_id} {exception_types}; inspect Harbor installer stderr in the job logs: {path}")
     passed = raw.get("passed")
     if type(passed) is not bool or passed != any(item.get("reward") == 1 for item in attempts):
         raise AdapterError(f"Terminal pass@2 reward mismatch: {path}")
@@ -417,7 +443,8 @@ def _validate_terminal_task(raw: dict[str, Any], case_id: str, content_sha256: s
     return passed
 
 
-def _parse_terminal_dir(base: Path, selected: list[str], manifest: dict[str, Any]) -> list[dict[str, Any]]:
+def _parse_terminal_dir(base: Path, selected: list[str], manifest: dict[str, Any],
+                        expected_output_cap: int | None = None) -> list[dict[str, Any]]:
     dirs = _terminal_model_dirs(base)
     if len(dirs) != 1:
         raise AdapterError(f"Expected one Terminal result set below {base}; found {len(dirs)}")
@@ -442,7 +469,8 @@ def _parse_terminal_dir(base: Path, selected: list[str], manifest: dict[str, Any
         if suite.get("manifest_hash") != TERMINAL_MANIFEST_HASH or suite.get("id") != TERMINAL_SUITE_ID:
             raise AdapterError(f"Terminal task suite identity mismatch: {path}")
         passed = _validate_terminal_task(
-            raw, case_id, manifest["tasks"][case_id]["content_sha256"], path
+            raw, case_id, manifest["tasks"][case_id]["content_sha256"], path,
+            expected_output_cap=expected_output_cap,
         )
         rows.append({"suite": TERMINAL, "case_id": case_id, "passed": passed})
     if summary.get("passed_tasks") != sum(row["passed"] for row in rows):
@@ -462,7 +490,8 @@ def _collect_terminal(cfg: dict[str, Any], root: Path, run_dir: Path) -> list[di
         base = Path(cfg.get("output_dir") or run_dir / TERMINAL / "results").expanduser().resolve()
     else:
         raise AdapterError("Terminal mode must be 'run' or 'import'")
-    return _parse_terminal_dir(base, selected, manifest)
+    return _parse_terminal_dir(base, selected, manifest,
+                               expected_output_cap=cfg.get("max_output_tokens"))
 
 
 def collect(component: str, cfg: dict[str, Any], root: Path, run_dir: Path) -> list[dict[str, Any]]:

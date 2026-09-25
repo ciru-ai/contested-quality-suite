@@ -16,9 +16,13 @@ That command installs its small Python dependencies on first use, runs the 54 ca
 ./benchmark --all
 ```
 
-The full run writes `runs/<run-id>/score.json`. The optional Aider, Hermes, and Terminal cases use bundled tasks and their native agent graders. Their Docker images consume substantially more disk space; see [SIZE_REPORT.md](SIZE_REPORT.md). Model weights and an inference server are not included.
+The full run writes `runs/<run-id>/score.json`. The optional Aider, Hermes, and Terminal cases use bundled tasks and their native agent graders. Their Docker images consume substantially more disk space; see [SIZE_REPORT.md](SIZE_REPORT.md). Model weights and an inference server are not included. Terminal setup checks that Docker has at least 12 GiB free before starting its task images. If `/v1/models` does not advertise context length, pass the model's real capacity with `--terminal-context-length N`.
 
 For a different server, use `./benchmark --endpoint https://your-server.example/v1`. Use `--label NAME` to record the checkpoint and quantization. `./benchmark check` verifies the locked package inputs without installing or running anything. `./benchmark doctor` checks the prepared local setup. Run `./benchmark --help` for component selection and other options. [AGENTS.md](AGENTS.md) is the short instruction for an agent in this repository.
+
+## Protocol v2
+
+[protocol.json](protocol.json) pins the current generation limits and defaults. HumanEval+, Terminal, and Tool-Eval now request up to 8,192 output tokens; Aider defaults to one concurrent task for one-session endpoints. HumanEval+ records each response's finish reason and token count. Tool-Eval records each turn's finish reason and token count. A length-stopped HumanEval+ or Tool-Eval response is marked non-scorable. Terminal setup exceptions are also non-scorable. These changes affect outcomes, so v2 scores must not be compared as if they used the v1.0.1 generation protocol. Run metadata and score files carry the protocol hash.
 
 ## Scoring and contents
 

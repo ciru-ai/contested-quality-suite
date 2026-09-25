@@ -421,6 +421,10 @@ async def run_scenario(
                 total_prompt_tokens += result.prompt_tokens
             if result.completion_tokens is not None:
                 total_completion_tokens += result.completion_tokens
+            trace_lines.append(
+                f"response_finish_reason_{turn}={result.raw_response.get('finish_reason')} "
+                f"completion_tokens={result.completion_tokens}"
+            )
 
             state.assistant_messages.append(result.content)
             messages.append(_assistant_message(result))

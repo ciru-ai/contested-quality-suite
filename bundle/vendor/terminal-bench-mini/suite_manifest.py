@@ -47,10 +47,10 @@ def _json_hash(value: Any) -> str:
 def task_tree_digest(task_dir: Path) -> str:
     """Hash every file in a task directory using a stable, path-aware format.
 
-    The digest covers the complete task package, including its environment,
-    verifier, solution and documentation. Directory locations and incidental
-    file metadata are excluded; the executable bit is retained because it can
-    change task behavior.
+    The digest covers the task package, including its environment, verifier,
+    solution and documentation. Generated Python and test caches are excluded
+    so loading a task cannot change its identity. Directory locations and
+    incidental file metadata are excluded; executable bits are retained.
     """
 
     task_dir = task_dir.resolve()
@@ -60,6 +60,8 @@ def task_tree_digest(task_dir: Path) -> str:
         path
         for path in task_dir.rglob("*")
         if path.is_file() and not path.is_symlink()
+        and not {"__pycache__", ".pytest_cache", ".mypy_cache"}.intersection(path.parts)
+        and path.suffix != ".pyc"
     )
     if not paths:
         raise SuiteManifestError(f"Task directory contains no files: {task_dir}")

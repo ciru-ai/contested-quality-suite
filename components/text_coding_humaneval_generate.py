@@ -109,10 +109,31 @@ def main() -> None:
             json.dumps({"task_id": task_id, "request": body, "response": reply,
                         "prompt_sha256": hashlib.sha256(row["prompt"].encode()).hexdigest()},
                        ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
-        samples.append({"task_id": task_id, "solution": code})
-        print(f"{task_id}: generated first sample ({choices[0].get('finish_reason')})", flush=True)
+        finish_reason = choices[0].get("finish_reason")
+        usage = reply.get("usage") or {}
+        completion_tokens = usage.get("completion_tokens")
+        if completion_tokens is not None and (type(completion_tokens) is not int or completion_tokens < 0):
+            raise ValueError(f"{task_id}: invalid completion token count")
+        cap = generation.get("max_tokens")
+        truncated = finish_reason in ("length", "max_tokens") or (
+            type(cap) is int and type(completion_tokens) is int and completion_tokens >= cap
+        )
+        samples.append({"task_id": task_id, "solution": code,
+                        "finish_reason": finish_reason,
+                        "completion_tokens": completion_tokens,
+                        "truncated": truncated})
+        print(f"{task_id}: generated first sample ({finish_reason}, {completion_tokens} completion tokens)", flush=True)
     args.samples.write_text("".join(json.dumps(row, ensure_ascii=False) + "\n" for row in samples),
                             encoding="utf-8")
+    summary = {"max_tokens": generation.get("max_tokens"),
+               "cases": [{key: row[key] for key in ("task_id", "finish_reason", "completion_tokens", "truncated")}
+                         for row in samples]}
+    (args.samples.parent / "generation-summary.json").write_text(
+        json.dumps(summary, indent=2) + "\n", encoding="utf-8")
+    truncated_ids = [row["task_id"] for row in samples if row["truncated"]]
+    if truncated_ids:
+        raise ValueError("HumanEval+ responses reached the output cap; non-scorable: "
+                         + ", ".join(truncated_ids))
 
 
 if __name__ == "__main__":

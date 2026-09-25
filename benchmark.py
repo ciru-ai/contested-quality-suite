@@ -23,11 +23,15 @@ from pathlib import Path
 
 import run_suite
 from components.slim_humaneval_grade import EXPECTED_SHA256
+from components.terminal_storage_preflight import check_space
 
 
 ROOT = Path(__file__).resolve().parent
 VENDOR = ROOT / "bundle" / "vendor"
 VENVS = ROOT / ".venvs"
+PROTOCOL_BYTES = (ROOT / "protocol.json").read_bytes()
+PROTOCOL = json.loads(PROTOCOL_BYTES)
+PROTOCOL_SHA256 = hashlib.sha256(PROTOCOL_BYTES).hexdigest()
 SOURCE_TAG = hashlib.sha256((ROOT / "bundle" / "vendor-lock.json").read_bytes()).hexdigest()[:12]
 AIDER_IMAGE = f"contested-aider:{SOURCE_TAG}"
 HERMES_IMAGE = f"contested-hermes-verifier:{SOURCE_TAG}"
@@ -82,6 +86,8 @@ def ensure_setup(names: list[str]) -> None:
         if subprocess.run([docker, "info"], stdout=subprocess.DEVNULL,
                           stderr=subprocess.DEVNULL).returncode:
             raise RuntimeError("Docker is installed but this user cannot access the Docker daemon")
+        if "terminal_core19_pass2" in names:
+            check_space(PROTOCOL["defaults"]["terminal_min_docker_free_gib"])
     else:
         docker = None
     if "humaneval_plus_164" in names:
@@ -150,6 +156,8 @@ def portable_config(endpoint: str, served: dict, args: argparse.Namespace) -> di
     tool_backend = args.tool_backend or ("llamacpp" if "llama" in owner else "vllm")
     cfg = {
         "run": {"output_root": str(ROOT / "runs")},
+        "protocol": {"id": PROTOCOL["id"], "version": PROTOCOL["version"],
+                     "sha256": PROTOCOL_SHA256},
         "model": {"label": label, "model": model, "api_base_url": endpoint},
         "components": {
             "arc_challenge_1172": {"enabled": True,
@@ -159,7 +167,8 @@ def portable_config(endpoint: str, served: dict, args: argparse.Namespace) -> di
                                   "ifeval_eval_dir": str(VENDOR / "ifeval")},
             "humaneval_plus_164": {"enabled": True,
                                    "native_harness": False,
-                                   "slim_python": str(VENVS / "he-slim" / "bin" / "python")},
+                                   "slim_python": str(VENVS / "he-slim" / "bin" / "python"),
+                                   "max_output_tokens": PROTOCOL["response_caps"]["humaneval_plus_164"]},
             "aider_polyglot_225": {"enabled": True, "mode": "docker", "host": "local",
                                    "portable": True, "auto_model_settings": True,
                                    "aider_repo": str(VENDOR / "aider"),
@@ -177,11 +186,13 @@ def portable_config(endpoint: str, served: dict, args: argparse.Namespace) -> di
                                       "endpoint": endpoint, "model": model,
                                       "platform": args.platform or "portable-linux",
                                       "model_name": label, "engine": args.engine or owner,
-                                      "backend": args.backend or "unspecified"},
+                                      "backend": args.backend or "unspecified",
+                                      "context_length": args.terminal_context_length,
+                                      "max_output_tokens": PROTOCOL["response_caps"]["terminal_core19_pass2"]},
             "tool_eval_hard15_v2_1_0": {"enabled": True, "base_url": endpoint,
                                         "model": model, "backend": tool_backend,
                                         "runner": str(VENVS / "tool-eval" / "bin" / "tool-eval-bench"),
-                                        "backend_kwargs": {}},
+                                        "backend_kwargs": {}, "max_output_tokens": PROTOCOL["response_caps"]["tool_eval_hard15_v2_1_0"]},
         },
     }
     return cfg
@@ -210,9 +221,14 @@ def main() -> int:
     p.add_argument("--engine")
     p.add_argument("--backend")
     p.add_argument("--tool-backend", choices=("llamacpp", "vllm", "litellm"))
-    p.add_argument("--aider-threads", type=int, default=8)
+    p.add_argument("--aider-threads", type=int, default=PROTOCOL["defaults"]["aider_threads"],
+                   help="Concurrent Aider tasks; default 1 for one-session endpoints")
+    p.add_argument("--terminal-context-length", type=int,
+                   help="Explicit Terminal model context when /v1/models omits it")
     p.add_argument("--hermes-workers", type=int, default=1)
     args = p.parse_args()
+    if args.terminal_context_length is not None and args.terminal_context_length < 1:
+        raise ValueError("--terminal-context-length must be positive")
     run_suite.verify_package()
     verify_vendor()
     if args.action == "check":
@@ -230,6 +246,8 @@ def main() -> int:
         if not args.run_dir:
             raise ValueError("collect requires --run-dir")
         provenance = json.loads((args.run_dir / "run-metadata.json").read_text())
+        if provenance.get("protocol", {}).get("sha256") != PROTOCOL_SHA256:
+            raise ValueError("collect requires results generated under this protocol version")
         args.endpoint = provenance["model"]["api_base_url"]
         served = {"id": provenance["model"]["model"],
                   "owned_by": "openai-compatible"}

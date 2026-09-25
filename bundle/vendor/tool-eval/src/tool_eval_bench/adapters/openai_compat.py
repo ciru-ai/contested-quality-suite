@@ -345,6 +345,7 @@ class OpenAICompatibleAdapter(BackendAdapter):
         tool_calls_map: dict[int, dict] = {}  # index → {id, name, arguments}
         reasoning_parts: list[str] = []
         stream_usage: dict = {}  # usage from final chunk
+        finish_reason: str | None = None
         loop_probe_parts: list[str] = []
         loop_probe_chars = 0
         next_loop_check = _LOOP_CHECK_EVERY_CHARS
@@ -392,6 +393,8 @@ class OpenAICompatibleAdapter(BackendAdapter):
                 choices = chunk.get("choices") or []
                 if not choices:
                     continue
+                if choices[0].get("finish_reason") is not None:
+                    finish_reason = str(choices[0]["finish_reason"])
 
                 delta = choices[0].get("delta") or {}
 
@@ -481,15 +484,13 @@ class OpenAICompatibleAdapter(BackendAdapter):
         return ChatCompletionResult(
             content=content,
             tool_calls=tool_calls,
-            raw_response=(
-                {
-                    "loop_aborted": True,
+            raw_response={
+                "finish_reason": finish_reason,
+                **({"loop_aborted": True,
                     "loop_period_chars": loop_period_chars,
-                    "observed_output_chars": loop_probe_chars,
-                }
-                if loop_period_chars is not None
-                else {}
-            ),
+                    "observed_output_chars": loop_probe_chars}
+                   if loop_period_chars is not None else {}),
+            },
             elapsed_ms=elapsed_ms,
             ttft_ms=ttft_ms,
             reasoning=reasoning_str,

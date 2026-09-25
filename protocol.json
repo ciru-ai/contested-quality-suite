@@ -1,0 +1,20 @@
+{
+  "id": "contested-quality-suite-protocol-v2",
+  "version": "2.0.0",
+  "selection_sha256": "3895748e8bd30b2dc1add1b396310a60bfa8a0f3c6f1a2f8482ec6bcc5948b75",
+  "response_caps": {
+    "arc_challenge_1172": 256,
+    "ifeval_541_strict": 2048,
+    "humaneval_plus_164": 8192,
+    "aider_polyglot_225": 16384,
+    "terminal_core19_pass2": 8192,
+    "tool_eval_hard15_v2_1_0": 8192
+  },
+  "defaults": {
+    "aider_threads": 1,
+    "terminal_min_docker_free_gib": 12
+  },
+  "terminal_context_length": "from endpoint metadata or explicit --terminal-context-length",
+  "truncation_policy": "HumanEval+, Terminal, or Tool-Eval responses reaching their explicit output cap are non-scorable. Terminal infrastructure exceptions are non-scorable. Native grading rules and task selections remain unchanged.",
+  "content_sha256": "77af04c36ec4ac548abcfe655f913d92a021486915edea7ea240860765c0bd06"
+}

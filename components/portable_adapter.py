@@ -10,6 +10,7 @@ from __future__ import annotations
 import json
 import hashlib
 import os
+import re
 import subprocess
 import sys
 from pathlib import Path
@@ -71,12 +72,16 @@ def _tool_steps(cfg: dict, root: Path, run_dir: Path) -> list[dict]:
     ids = ag._selected(root, TOOL)
     prepare = [sys.executable, str(root / "components" / "portable_tool.py"),
                "prepare", "--runner", runner, "--output", str(output)]
+    backend_kwargs = {**cfg.get("backend_kwargs", {}),
+                      "max_tokens": int(cfg.get("max_output_tokens", 8192))}
+    if backend_kwargs["max_tokens"] < 1:
+        raise ValueError("Tool-Eval max_output_tokens must be positive")
     args = [runner, "--base-url", str(cfg["base_url"]),
             "--backend", str(cfg.get("backend", "vllm")),
             "--model", str(cfg["model"]),
             "--temperature", str(cfg.get("temperature", 1.0)),
             "--top-p", str(cfg.get("top_p", 0.95)),
-            "--backend-kwargs", json.dumps(cfg.get("backend_kwargs", {}), sort_keys=True),
+            "--backend-kwargs", json.dumps(backend_kwargs, sort_keys=True),
             "--seed", str(cfg.get("seed", 1)),
             "--parallel", str(cfg.get("parallel", 1)),
             "--max-turns", str(cfg.get("max_turns", 8)),
@@ -106,7 +111,7 @@ def build_steps(component: str, cfg: dict, root: Path, run_dir: Path) -> list[di
                                        "--generation-json", json.dumps(generation, separators=(",", ":"))])]
     if component == tc.HUMANEVAL and not cfg.get("native_harness"):
         generation = cfg.get("humaneval_generation", {
-            "temperature": 0.0, "max_tokens": 1024, "n": 1, "seed": 0,
+            "temperature": 0.0, "max_tokens": int(cfg.get("max_output_tokens", 8192)), "n": 1, "seed": 0,
             "top_p": 0.95, "top_k": 20, "min_p": 0.0,
             "chat_template_kwargs": {"enable_thinking": False},
             "stream": False, "cache_prompt": False,
@@ -164,6 +169,11 @@ def collect(component: str, cfg: dict, root: Path, run_dir: Path) -> list[dict]:
         samples = tc._jsonl(base / "samples.jsonl")
         if len(samples) != len(selected) or {row["task_id"] for row in samples} != set(selected):
             raise ValueError("HumanEval+ generated sample set incomplete")
+        truncated = [row["task_id"] for row in samples if row.get("truncated")]
+        if truncated:
+            raise ValueError("HumanEval+ output truncated; results are non-scorable: " + ", ".join(truncated))
+        if any("finish_reason" not in row or "completion_tokens" not in row for row in samples):
+            raise ValueError("HumanEval+ generation metadata missing; do not mix older protocol outputs")
         fixture = json.loads((root / "selectors" / "humaneval-plus-expected.json").read_text())
         expected_sha = hashlib.sha256((root / "selectors" / "humaneval-plus-native.jsonl").read_bytes()).hexdigest()
         native = json.loads((base / "native_scores.json").read_text())
@@ -191,6 +201,15 @@ def collect(component: str, cfg: dict, root: Path, run_dir: Path) -> list[dict]:
     if component == TOOL:
         path = _tool_dir(run_dir) / "result.json"
         result = json.loads(path.read_text())
+        cap = int(cfg.get("max_output_tokens", 8192))
+        truncated = [row.get("scenario_id") for row in result["scores"]["scenario_results"]
+                     if re.search(r"^response_finish_reason_\d+=(?:length|max_tokens)\b",
+                                  str(row.get("raw_log", "")), re.MULTILINE)
+                     or re.search(rf"^response_finish_reason_\d+=\S+ completion_tokens={cap}\b",
+                                  str(row.get("raw_log", "")), re.MULTILINE)]
+        if truncated:
+            raise ValueError("Tool-Eval output truncated; results are non-scorable: "
+                             + ", ".join(str(x) for x in truncated))
         compact = {key: result.get(key) for key in
                    ("status", "tool_eval_bench_version", "total_scenarios", "config")}
         compact["scenario_results"] = [

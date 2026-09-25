@@ -40,6 +40,7 @@ ADAPTER_MODULES = {
 }
 SENSITIVE = ("KEY", "TOKEN", "SECRET", "PASSWORD", "CREDENTIAL")
 LOCKED_INPUT_SHA256 = {
+    "protocol.json": "fb7c60a51f3dd82a9357dcad3dd7756d0199cfd5e6854756013899bebab9d2ae",
     "selectors/aider-tasks.txt": "04111c1d039977f244bf90d8ed79b14269b086b825638d3f2b0f2b32bf754d61",
     "selectors/arc-challenge.jsonl": "977f6210e66686ea363a203a49819ff6edf0c40fcb9059d42487b19313d2d452",
     "selectors/hermesagent-scenarios.txt": "c759090d2604b4d19f51c43a08fa8ef672cbb257bda1de187008c1b88a0da3fe",
@@ -145,6 +146,9 @@ def component_provenance(config: dict, names: list[str]) -> dict:
                               if key in cfg), None),
             "host": cfg.get("host", "local"),
             "mode": cfg.get("mode", "run"),
+            "aider_threads": cfg.get("threads") if name == "aider_polyglot_225" else None,
+            "context_length_override": cfg.get("context_length") if name == "terminal_core19_pass2" else None,
+            "max_output_tokens": cfg.get("max_output_tokens"),
         }
     return provenance
 
@@ -339,6 +343,8 @@ def collect_all(config: dict, names: list[str], run_dir: Path) -> dict:
     output_path = run_dir / "outcomes.jsonl"
     output_path.write_text("".join(json.dumps(row) + "\n" for row in all_rows))
     report = score(output_path, allow_partial=True)
+    if config.get("protocol"):
+        report["protocol"] = config["protocol"]
     suite_complete = report["completed_cases"] == report["total_cases"]
     requested_complete = len(counts) == len(names) and not errors
     score_path = run_dir / ("score.json" if suite_complete else "score.partial.json")
@@ -354,6 +360,8 @@ def collect_all(config: dict, names: list[str], run_dir: Path) -> dict:
 
 def run(config: dict, names: list[str], run_dir: Path, *, resume: bool,
         continue_on_error: bool) -> dict:
+    if config.get("protocol") and config["protocol"].get("sha256") != LOCKED_INPUT_SHA256["protocol.json"]:
+        raise ValueError("run protocol hash differs from the packaged protocol")
     config_problems = launch_config_issues(config, names)
     if config_problems:
         raise ValueError("run configuration needs setup:\n" + "\n".join(config_problems))
@@ -374,8 +382,11 @@ def run(config: dict, names: list[str], run_dir: Path, *, resume: bool,
             raise ValueError("resume requires the same config, component list, and command plan")
         if state.get("suite_content_sha256") != MANIFEST["content_sha256"]:
             raise ValueError("suite content changed since this run began")
+        if state.get("protocol_sha256") != config.get("protocol", {}).get("sha256"):
+            raise ValueError("run protocol changed since this run began")
     else:
         state = {"suite_id": MANIFEST["id"], "suite_content_sha256": MANIFEST["content_sha256"],
+                 "protocol_sha256": config.get("protocol", {}).get("sha256"),
                  "plan_sha256": plan_hash, "config_sha256": config_hash, "created_at_utc": utc_now(),
                  "steps": {}}
         write_json(state_path, state)
@@ -383,6 +394,7 @@ def run(config: dict, names: list[str], run_dir: Path, *, resume: bool,
     write_json(run_dir / "run-metadata.json", {
         "suite_id": MANIFEST["id"], "selection_sha256": MANIFEST["selection_sha256"],
         "content_sha256": MANIFEST["content_sha256"], "run_dir": str(run_dir),
+        "protocol": config.get("protocol"),
         "components": names, "model": {k: v for k, v in config.get("model", {}).items()
                                       if not any(secret in k.upper() for secret in SENSITIVE)},
         "component_model_provenance": component_provenance(config, names),

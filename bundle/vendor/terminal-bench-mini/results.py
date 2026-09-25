@@ -345,6 +345,7 @@ def normalized_attempt(
     model_dir: Path,
     repo_root: Path,
     transcript_name: str,
+    max_output_tokens: int | None = None,
     endpoint: str | None = None,
     paths_key: str = "pier_paths",
 ) -> dict[str, Any]:
@@ -368,6 +369,22 @@ def normalized_attempt(
             ]
         except (OSError, ValueError, json.JSONDecodeError):
             pass
+    finish_reasons = [
+        str((step.get("metrics") or {}).get("finish_reason"))
+        for step in transcript_steps
+        if isinstance(step.get("metrics"), dict)
+        and (step["metrics"].get("finish_reason") is not None)
+    ]
+    output_limit_hits = sum(
+        1 for step in transcript_steps
+        if isinstance(step.get("metrics"), dict)
+        and max_output_tokens is not None
+        and isinstance(step["metrics"].get("completion_tokens"), int)
+        and step["metrics"]["completion_tokens"] >= max_output_tokens
+    )
+    output_limit_hits = max(output_limit_hits, sum(
+        reason in {"length", "max_tokens"} for reason in finish_reasons
+    ))
 
     agent_steps = result.get("n_agent_steps") or agent_result.get("n_agent_steps")
     if agent_steps is None and transcript_steps:
@@ -404,6 +421,9 @@ def normalized_attempt(
             "peak_context": peak_context,
         },
         "agent_steps": agent_steps,
+        "generation": {"max_output_tokens": max_output_tokens,
+                       "finish_reasons": finish_reasons,
+                       "output_limit_hits": output_limit_hits},
         "exception": exception,
         "endpoint": endpoint,
         "transcript": transcript_name if transcript_source.is_file() else None,
@@ -715,6 +735,7 @@ def export_job(
                     model_dir=model_dir,
                     repo_root=repo_root,
                     transcript_name=transcript_name,
+                    max_output_tokens=(run_meta.get("evaluation_profile", {}).get("agent") or {}).get("max_output_tokens"),
                     endpoint=run_meta.get("endpoint"),
                     paths_key=paths_key,
                 )
@@ -745,6 +766,8 @@ def export_job(
                 for key in ("input", "cached", "output")
             },
             "agent_steps": sum((row.get("agent_steps") or 0) for row in normalized_attempts),
+            "output_limit_hits": sum((row.get("generation") or {}).get("output_limit_hits", 0)
+                                     for row in normalized_attempts),
             "attempts": normalized_attempts,
             "succeeded_at_attempt": successful["attempt"] if successful else None,
             "transcript": selected["transcript"],

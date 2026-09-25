@@ -31,6 +31,7 @@ LEGACY_SUITE = "legacy-mini20"
 DEFAULT_ENDPOINT = "http://localhost:8080/v1"
 DEFAULT_AGENT_TIMEOUT_SECONDS = 3 * 60 * 60
 DEFAULT_ATTEMPTS = 2
+DEFAULT_MAX_OUTPUT_TOKENS = 8192
 AGENT_NAME = "terminus-2"
 AGENT_VERSION = "2.0.0"
 SUMMARIZATION_FREE_TOKENS = 8_000
@@ -491,6 +492,7 @@ def evaluation_profile(
     inference_profile: str | None,
     tag: str | None,
     context_length: int,
+    max_output_tokens: int,
     agent_timeout_seconds: int,
     suite: dict[str, Any] | None = None,
 ) -> dict[str, Any]:
@@ -511,6 +513,7 @@ def evaluation_profile(
             "name": AGENT_NAME,
             "version": AGENT_VERSION,
             "context_length": context_length,
+            "max_output_tokens": max_output_tokens,
             "context_summarization": True,
             "summarization_free_tokens": SUMMARIZATION_FREE_TOKENS,
         },
@@ -604,6 +607,7 @@ def build_config(
     api_key: str,
     concurrency: int,
     context_length: int,
+    max_output_tokens: int,
     agent_timeout_seconds: int,
     keep_containers: bool,
     dataset_groups: list[tuple[Path, list[str]]] | None = None,
@@ -644,8 +648,9 @@ def build_config(
                     "api_base": endpoint,
                     "enable_summarize": True,
                     "proactive_summarization_threshold": SUMMARIZATION_FREE_TOKENS,
-                    "model_info": {"max_input_tokens": context_length},
-                    "llm_kwargs": {"api_key": api_key},
+                    "model_info": {"max_input_tokens": context_length,
+                                   "max_output_tokens": max_output_tokens},
+                    "llm_kwargs": {"api_key": api_key, "max_tokens": max_output_tokens},
                 },
             }
         ],
@@ -1960,6 +1965,8 @@ def retry_failed(args: argparse.Namespace) -> int:
     profile = meta.get("evaluation_profile") or {}
     agent_profile = profile.get("agent") or {}
     context_length = int(agent_profile.get("context_length") or 0)
+    if int(agent_profile.get("max_output_tokens") or 0) < 1:
+        raise RunnerError("Stored run predates the explicit output cap; start a new protocol run")
     agent_timeout = int(profile.get("agent_timeout_seconds") or 0)
     if context_length < 1 or agent_timeout < 1:
         raise RunnerError("Stored evaluation profile lacks context length or agent timeout")
@@ -2013,6 +2020,7 @@ def retry_failed(args: argparse.Namespace) -> int:
         api_key=args.api_key,
         concurrency=args.concurrency,
         context_length=context_length,
+        max_output_tokens=int((profile.get("agent") or {}).get("max_output_tokens") or DEFAULT_MAX_OUTPUT_TOKENS),
         agent_timeout_seconds=agent_timeout,
         keep_containers=args.keep_containers,
         dataset_groups=task_groups,
@@ -2753,6 +2761,7 @@ def rerun_arguments(campaign: dict[str, Any]) -> list[str]:
         [
             "--model", str(model["id"]),
             "--context-length", str(campaign["context_length"]),
+            "--max-output-tokens", str((profile.get("agent") or {}).get("max_output_tokens") or DEFAULT_MAX_OUTPUT_TOKENS),
             "--platform", str(platform_id),
             "--model-name", str(model["name"]),
             "--engine", str(campaign["engine"]),
@@ -2852,6 +2861,9 @@ def add_connection_args(parser: argparse.ArgumentParser) -> None:
         type=int,
         help="Model context capacity; normally discovered from GET /models",
     )
+    parser.add_argument("--max-output-tokens", type=int,
+                        default=DEFAULT_MAX_OUTPUT_TOKENS,
+                        help="Explicit per-request output cap for the Terminus agent")
 
 
 def add_suite_args(
@@ -3144,8 +3156,8 @@ def main(argv: list[str] | None = None) -> int:
             raise RunnerError(f"Unsupported command: {args.command}")
         engine, engine_version, backend, backend_version = run_runtime
         model_name, quant, inference_profile, tag = run_identity_args(args)
-        if args.attempts < 1 or args.concurrency < 1 or args.agent_timeout < 1:
-            raise RunnerError("--attempts, --concurrency and --agent-timeout must be positive")
+        if args.attempts < 1 or args.concurrency < 1 or args.agent_timeout < 1 or args.max_output_tokens < 1:
+            raise RunnerError("--attempts, --concurrency, --agent-timeout and --max-output-tokens must be positive")
         tier = "task" if args.task else args.tier
         task_groups = suite.grouped_tasks(requested)
         tasks_dir = task_groups[0][0]
@@ -3164,6 +3176,7 @@ def main(argv: list[str] | None = None) -> int:
             inference_profile=inference_profile,
             tag=tag,
             context_length=context_length,
+            max_output_tokens=args.max_output_tokens,
             agent_timeout_seconds=args.agent_timeout,
             suite=suite_identity,
         )
@@ -3236,6 +3249,7 @@ def main(argv: list[str] | None = None) -> int:
             api_key=args.api_key,
             concurrency=args.concurrency,
             context_length=context_length,
+            max_output_tokens=args.max_output_tokens,
             agent_timeout_seconds=args.agent_timeout,
             keep_containers=args.keep_containers,
             dataset_groups=suite.grouped_tasks(tasks),
