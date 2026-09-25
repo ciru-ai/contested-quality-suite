@@ -285,6 +285,9 @@ def _build_terminal_steps(cfg: dict[str, Any], root: Path, run_dir: Path) -> lis
     max_output_tokens = cfg.get("max_output_tokens", 8192)
     if type(max_output_tokens) is not int or max_output_tokens < 1:
         raise AdapterError("Terminal max_output_tokens must be a positive integer")
+    concurrency = cfg.get("concurrency", 1)
+    if type(concurrency) is not int or concurrency < 1:
+        raise AdapterError("Terminal concurrency must be a positive integer")
     doctor = [str(runner), "doctor", *common]
     output = Path(cfg.get("output_dir") or run_dir / TERMINAL / "results").expanduser().resolve()
     run_id = run_dir.name
@@ -300,7 +303,7 @@ def _build_terminal_steps(cfg: dict[str, Any], root: Path, run_dir: Path) -> lis
         "--model-name", _required(cfg, "model_name"),
         "--engine", _required(cfg, "engine"),
         "--backend", _required(cfg, "backend"),
-        "--attempts", "2", "--concurrency", "1",
+        "--attempts", "2", "--concurrency", str(concurrency),
         "--results-dir", str(output),
         "--job-name", job_name,
     ]

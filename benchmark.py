@@ -188,11 +188,13 @@ def portable_config(endpoint: str, served: dict, args: argparse.Namespace) -> di
                                       "model_name": label, "engine": args.engine or owner,
                                       "backend": args.backend or "unspecified",
                                       "context_length": args.terminal_context_length,
+                                      "concurrency": args.terminal_concurrency,
                                       "max_output_tokens": PROTOCOL["response_caps"]["terminal_core19_pass2"]},
             "tool_eval_hard15_v2_1_0": {"enabled": True, "base_url": endpoint,
                                         "model": model, "backend": tool_backend,
                                         "runner": str(VENVS / "tool-eval" / "bin" / "tool-eval-bench"),
-                                        "backend_kwargs": {}, "max_output_tokens": PROTOCOL["response_caps"]["tool_eval_hard15_v2_1_0"]},
+                                        "backend_kwargs": {}, "parallel": args.tool_parallel,
+                                        "max_output_tokens": PROTOCOL["response_caps"]["tool_eval_hard15_v2_1_0"]},
         },
     }
     return cfg
@@ -223,10 +225,17 @@ def main() -> int:
     p.add_argument("--tool-backend", choices=("llamacpp", "vllm", "litellm"))
     p.add_argument("--aider-threads", type=int, default=PROTOCOL["defaults"]["aider_threads"],
                    help="Concurrent Aider tasks; default 1 for one-session endpoints")
+    p.add_argument("--terminal-concurrency", type=int, default=1,
+                   help="Concurrent Terminal agent trials; default 1")
+    p.add_argument("--tool-parallel", type=int, default=1,
+                   help="Concurrent Tool-Eval scenarios; default 1")
     p.add_argument("--terminal-context-length", type=int,
                    help="Explicit Terminal model context when /v1/models omits it")
     p.add_argument("--hermes-workers", type=int, default=1)
     args = p.parse_args()
+    if min(args.aider_threads, args.hermes_workers, args.terminal_concurrency,
+           args.tool_parallel) < 1:
+        raise ValueError("agent concurrency settings must be positive")
     if args.terminal_context_length is not None and args.terminal_context_length < 1:
         raise ValueError("--terminal-context-length must be positive")
     run_suite.verify_package()

@@ -32,6 +32,7 @@ class ProtocolTests(unittest.TestCase):
     def setUp(self) -> None:
         args = SimpleNamespace(model=None, label="test", tool_backend="vllm",
                                aider_threads=1, hermes_workers=1,
+                               terminal_concurrency=1, tool_parallel=1,
                                terminal_context_length=262144, platform=None,
                                engine=None, backend=None)
         self.config = benchmark.portable_config(
@@ -61,6 +62,17 @@ class ProtocolTests(unittest.TestCase):
         kwargs = native["agents"][0]["kwargs"]
         self.assertEqual(kwargs["llm_kwargs"]["max_tokens"], 8192)
         self.assertEqual(kwargs["model_info"]["max_output_tokens"], 8192)
+
+    def test_four_agent_workers_reach_each_native_runner(self) -> None:
+        for name, key in ((at.AIDER, "threads"), (pa.HERMES, "workers"),
+                          (at.TERMINAL, "concurrency"), (pa.TOOL, "parallel")):
+            self.config["components"][name][key] = 4
+        terminal = at.build_steps(at.TERMINAL, self.config["components"][at.TERMINAL],
+                                  ROOT, Path("/tmp/protocol-test-run"))[2]["argv"]
+        self.assertEqual(terminal[terminal.index("--concurrency") + 1], "4")
+        tool = pa._tool_steps(self.config["components"][pa.TOOL], ROOT,
+                              Path("/tmp/protocol-test-run"))[1]["argv"]
+        self.assertEqual(tool[tool.index("--parallel") + 1], "4")
 
     def test_tool_and_humaneval_caps_are_explicit(self) -> None:
         tool = pa._tool_steps(self.config["components"][pa.TOOL], ROOT,
