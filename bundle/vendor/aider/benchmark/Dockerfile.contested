@@ -66,6 +66,12 @@ RUN curl -fsSL https://deb.nodesource.com/setup_20.x | bash - && \
 COPY . /aider
 RUN pip3 install --no-cache-dir --upgrade pip uv
 ENV SETUPTOOLS_SCM_PRETEND_VERSION=0.0.0
-RUN uv pip install --system --no-cache-dir -e /aider pytest==9.0.2
+RUN uv pip install --system --no-cache-dir -e /aider \
+    pytest==9.0.2 \
+    lox==1.0.0 \
+    pandas==2.3.3 \
+    matplotlib==3.10.8 \
+    imgcat==0.6.0
+RUN cd /aider/benchmark && python3.11 -c 'import benchmark'
 RUN git config --global --add safe.directory /aider
 WORKDIR /aider

@@ -152,7 +152,7 @@
     "aider/aider/watch.py": "ce709984708195c326fb849124ff81d2659fb25e6adba0c077ece5936cf2910f",
     "aider/aider/watch_prompts.py": "2479973d950a9b56f5a20db642895ba14f9789ee9b25686695b2818b64ad91d2",
     "aider/benchmark/Dockerfile": "352813bb478c35b88981d03a23679b33f5d1a78871c53173a68b52422fe68e80",
-    "aider/benchmark/Dockerfile.contested": "38eddd2d5722a985f35789a2365af2604ae08bb81e3fa7c17c90fe19072ab708",
+    "aider/benchmark/Dockerfile.contested": "f91321123e7ff24a1e729f041ac83f138f0f30dd16ba39b0f60eedf693082c32",
     "aider/benchmark/README.md": "c87a9cd84c1d55a0d5e3d3b7d61e65d83c0dd6f66fe12310bfd37c5994d22074",
     "aider/benchmark/__init__.py": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
     "aider/benchmark/benchmark.py": "ba350b7b3ebcc9da6f588c0724dade552791b3c5edd9f16641eadb5931de9c30",
