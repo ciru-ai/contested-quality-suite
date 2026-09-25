@@ -1,0 +1,20 @@
+id: YAML-01
+title: Simple weather lookup
+category: A
+difficulty: 1
+description: >
+  Pilot YAML scenario. The model should call get_weather with location=Berlin
+  and return the result.
+user_message: What is the weather in Berlin?
+expected_tool_calls:
+  - tool: get_weather
+    arguments:
+      location: Berlin
+tool_responses:
+  get_weather:
+    - match:
+        location: Berlin
+      response:
+        location: Berlin
+        temperature_c: 18
+        condition: cloudy

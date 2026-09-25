@@ -1,0 +1,1670 @@
+{
+  "schema_version": 1,
+  "id": "qwen38-contested-quality-hotlist-v2",
+  "generated_at_utc": "2026-09-25T00:28:38.232030+00:00",
+  "selection_sha256": "3895748e8bd30b2dc1add1b396310a60bfa8a0f3c6f1a2f8482ec6bcc5948b75",
+  "content_sha256": "77af04c36ec4ac548abcfe655f913d92a021486915edea7ea240860765c0bd06",
+  "source_sha256": {
+    "observations-27b.jsonl": "c2228e98386a4444c80ab77afbddd06ed9a9699263406b43c467b42bd641e2d4",
+    "observations-arc.jsonl": "db788379ea828dfa6c8e908a61596321fc2a172b58c60fea5daf21b9b80f20a3",
+    "observations-flash.jsonl": "7bb0243f9f659e5e4c43e37a8ea78868a25346aa43b3e679617f4b687ef6e276"
+  },
+  "score_policy": "Preserve native pass/fail rules. Slim ARC and HumanEval+ use selected-case equivalent graders; other components use their native verifiers. Primary score is the equal-weight macro average across all seven contested components; frontier is reported separately.",
+  "suite_labels": {
+    "arc_challenge_1172": "ARC-Challenge",
+    "ifeval_541_strict": "IFEval strict prompt",
+    "aider_polyglot_225": "Aider Polyglot pass@2",
+    "hermesagent_20": "HermesAgent-20",
+    "humaneval_plus_164": "HumanEval+",
+    "terminal_core19_pass2": "Terminal-Bench Core-19 pass@2",
+    "tool_eval_hard15_v2_1_0": "Tool-Eval hard-15 v2.1.0"
+  },
+  "components": {
+    "arc_challenge_1172": {
+      "selector": "selectors/arc-challenge.jsonl",
+      "native_grader": "EvalScope ARC-Challenge exact answer letter",
+      "score_mode": "pass@1",
+      "case_count": 18,
+      "contested_count": 17,
+      "frontier_count": 1
+    },
+    "ifeval_541_strict": {
+      "selector": "selectors/ifeval-input-data.jsonl",
+      "native_grader": "Official IFEval strict prompt-level follow_all_instructions",
+      "score_mode": "pass@1",
+      "dataset_sha256": "67ffeee0fcb87c317c5b08a2de85557b4a7e96ada6178aa645b4954fe4b53d49",
+      "case_count": 27,
+      "contested_count": 24,
+      "frontier_count": 3
+    },
+    "aider_polyglot_225": {
+      "selector": "selectors/aider-tasks.txt",
+      "native_grader": "Frozen Aider Polyglot exercise tests",
+      "score_mode": "pass@2",
+      "dataset_revision": "7e0611e77b54e2dea774cdc0aa00cf9f7ed6144f",
+      "aider_revision": "5dc9490bb35f9729ef2c95d00a19ccd30c26339c",
+      "harness_overlay_sha256": "2497a20ad688e6422c838318f408f0ae3c67793504d550a137d6d1a58f04c99e",
+      "case_count": 26,
+      "contested_count": 24,
+      "frontier_count": 2
+    },
+    "hermesagent_20": {
+      "selector": "selectors/hermesagent-scenarios.txt",
+      "native_grader": "HermesAgent-20 scenario verifier",
+      "score_mode": "scenario pass",
+      "manifest_sha256": "3936081de0e3ea356c3d3c2e04486b6780888d22327c2b100b51a34c7103d498",
+      "core_sha256": "04f9ad59185d0c756a770e38b3d6b6888bb6046fec1670dbf216593987ffe7fb",
+      "case_count": 11,
+      "contested_count": 11,
+      "frontier_count": 0
+    },
+    "humaneval_plus_164": {
+      "selector": "selectors/humaneval-plus-native.jsonl",
+      "native_grader": "EvalPlus HumanEval+ v0.1.10 plus tests",
+      "score_mode": "pass@1",
+      "dataset_md5": "fe585eb4df8c88d844eeb463ea4d0302",
+      "case_count": 5,
+      "contested_count": 5,
+      "frontier_count": 0
+    },
+    "terminal_core19_pass2": {
+      "selector": "terminal-core19-hotlist.json",
+      "native_grader": "Terminal-Bench Core-19 task verifier",
+      "score_mode": "pass@2",
+      "parent_manifest_sha256": "8db507125de192b10b0930110efe9e014696fa30c274dc8e76c8337a84e23cf7",
+      "case_count": 4,
+      "contested_count": 4,
+      "frontier_count": 0
+    },
+    "tool_eval_hard15_v2_1_0": {
+      "selector": "selectors/tool-eval-hard15-v2.1.0.txt",
+      "native_grader": "Tool-Eval hard-15 v2.1.0 scenario verifier",
+      "score_mode": "full pass, two points",
+      "case_count": 4,
+      "contested_count": 4,
+      "frontier_count": 0
+    }
+  },
+  "cases": [
+    {
+      "suite": "arc_challenge_1172",
+      "case_id": "arc:ARC-Challenge:Mercury_404820",
+      "tier": "contested",
+      "pass_count": 1,
+      "fail_count": 3,
+      "valid_run_count": 4,
+      "repeat_flip": false,
+      "within_protocol_contested": true,
+      "task": {
+        "arc_id": "Mercury_404820",
+        "question": "An atom of chromium has 24 protons, 28 neutrons, and 24 electrons. How many subatomic particles are in the nucleus of a chromium atom?",
+        "choices": "A) 24\nB) 28\nC) 48\nD) 52",
+        "prompt": "Answer the following multiple choice question. The entire content of your response should be of the following format: 'ANSWER: [LETTER]' (without quotes) where [LETTER] is one of A,B,C,D.\n\nAn atom of chromium has 24 protons, 28 neutrons, and 24 electrons. How many subatomic particles are in the nucleus of a chromium atom?\n\nA) 24\nB) 28\nC) 48\nD) 52",
+        "target": "D",
+        "prompt_sha256": "27bd687e34035a73a53825a7a0844d3eaf7c78707a2f0cb8232f1a2e242c4621",
+        "case_definition_hash": "892e8c19d58e25d44df3fd2e860ba0a127f7a80c9d4de452f214b10badd64a43"
+      }
+    },
+    {
+      "suite": "arc_challenge_1172",
+      "case_id": "arc:ARC-Challenge:Mercury_7099330",
+      "tier": "contested",
+      "pass_count": 1,
+      "fail_count": 3,
+      "valid_run_count": 4,
+      "repeat_flip": false,
+      "within_protocol_contested": true,
+      "task": {
+        "arc_id": "Mercury_7099330",
+        "question": "A star produces energy through a process called nuclear fusion. Which aspect of a star enables the process of fusion to occur?",
+        "choices": "A) rotational speed\nB) apparent brightness\nC) surface temperature\nD) chemical composition",
+        "prompt": "Answer the following multiple choice question. The entire content of your response should be of the following format: 'ANSWER: [LETTER]' (without quotes) where [LETTER] is one of A,B,C,D.\n\nA star produces energy through a process called nuclear fusion. Which aspect of a star enables the process of fusion to occur?\n\nA) rotational speed\nB) apparent brightness\nC) surface temperature\nD) chemical composition",
+        "target": "D",
+        "prompt_sha256": "1311efc045e4648b33e05f07ec27002cbfeb043cf7a200b08a59feb5ef7adb1e",
+        "case_definition_hash": "a447fdcc7f46a9f447c8f479a791cbe2915377be9987894b7ced3c3097790ecb"
+      }
+    },
+    {
+      "suite": "arc_challenge_1172",
+      "case_id": "arc:ARC-Challenge:CSZ20754",
+      "tier": "contested",
+      "pass_count": 2,
+      "fail_count": 2,
+      "valid_run_count": 4,
+      "repeat_flip": false,
+      "within_protocol_contested": true,
+      "task": {
+        "arc_id": "CSZ20754",
+        "question": "Which characteristic of motion could change without changing the velocity of an object?",
+        "choices": "A) the speed\nB) the position\nC) the direction\nD) the acceleration",
+        "prompt": "Answer the following multiple choice question. The entire content of your response should be of the following format: 'ANSWER: [LETTER]' (without quotes) where [LETTER] is one of A,B,C,D.\n\nWhich characteristic of motion could change without changing the velocity of an object?\n\nA) the speed\nB) the position\nC) the direction\nD) the acceleration",
+        "target": "B",
+        "prompt_sha256": "a84c4a1487f5f7c48458a99835e40653be52a4ca5d0f2f908a2c3ea9f184c766",
+        "case_definition_hash": "a79f35012932a57da5692edfb6a6031685c12ac6a107f7b20565b9815b5d5622"
+      }
+    },
+    {
+      "suite": "arc_challenge_1172",
+      "case_id": "arc:ARC-Challenge:MCAS_2004_8_7",
+      "tier": "contested",
+      "pass_count": 2,
+      "fail_count": 2,
+      "valid_run_count": 4,
+      "repeat_flip": false,
+      "within_protocol_contested": true,
+      "task": {
+        "arc_id": "MCAS_2004_8_7",
+        "question": "Several students are entering a bridge building contest that requires using ice cream sticks and glue to construct the strongest bridge possible. The bridges must be 5 in. wide and span a length of 18 in. Which of the following tests is the most accurate way to determine the strongest span design for these bridges?",
+        "choices": "A) roll toy cars across each bridge until it collapses\nB) place concrete construction blocks on top of each bridge until it collapses\nC) stack coins on both ends of each bridge until it collapses\nD) place D-cell batteries at the center of each bridge until it collapses",
+        "prompt": "Answer the following multiple choice question. The entire content of your response should be of the following format: 'ANSWER: [LETTER]' (without quotes) where [LETTER] is one of A,B,C,D.\n\nSeveral students are entering a bridge building contest that requires using ice cream sticks and glue to construct the strongest bridge possible. The bridges must be 5 in. wide and span a length of 18 in. Which of the following tests is the most accurate way to determine the strongest span design for these bridges?\n\nA) roll toy cars across each bridge until it collapses\nB) place concrete construction blocks on top of each bridge until it collapses\nC) stack coins on both ends of each bridge until it collapses\nD) place D-cell batteries at the center of each bridge until it collapses",
+        "target": "D",
+        "prompt_sha256": "5f6264d5d5db114a5375c203d890d71d0c5621d777edae68882576da679cc48a",
+        "case_definition_hash": "cc927c323bb3102dd0146e4bda2e76da8548df8315a4720ab58de204066ac75d"
+      }
+    },
+    {
+      "suite": "arc_challenge_1172",
+      "case_id": "arc:ARC-Challenge:Mercury_400699",
+      "tier": "contested",
+      "pass_count": 2,
+      "fail_count": 2,
+      "valid_run_count": 4,
+      "repeat_flip": false,
+      "within_protocol_contested": true,
+      "task": {
+        "arc_id": "Mercury_400699",
+        "question": "A student mixes vinegar and baking soda to use in a volcano model. The mixture causes the volcano model to feel cool when it is touched. What energy transformation has taken place?",
+        "choices": "A) light energy changed to heat energy\nB) heat energy changed to chemical energy\nC) chemical energy changed to heat energy\nD) chemical energy changed to light energy",
+        "prompt": "Answer the following multiple choice question. The entire content of your response should be of the following format: 'ANSWER: [LETTER]' (without quotes) where [LETTER] is one of A,B,C,D.\n\nA student mixes vinegar and baking soda to use in a volcano model. The mixture causes the volcano model to feel cool when it is touched. What energy transformation has taken place?\n\nA) light energy changed to heat energy\nB) heat energy changed to chemical energy\nC) chemical energy changed to heat energy\nD) chemical energy changed to light energy",
+        "target": "B",
+        "prompt_sha256": "7c86adee84f3c6fcc11e582421e154c8f7ea08f8311932f6b269666999d3f40e",
+        "case_definition_hash": "63ee13d822258c22256429d2940450ceadcfa30a60ee42fb179a4b3255e9919b"
+      }
+    },
+    {
+      "suite": "arc_challenge_1172",
+      "case_id": "arc:ARC-Challenge:Mercury_409085",
+      "tier": "contested",
+      "pass_count": 2,
+      "fail_count": 2,
+      "valid_run_count": 4,
+      "repeat_flip": false,
+      "within_protocol_contested": true,
+      "task": {
+        "arc_id": "Mercury_409085",
+        "question": "A bicycle is traveling at 3 meters per second (m/s). The rider applies the brakes and stops the bicycle in 3 seconds. What is the average rate of acceleration of the bicycle during this time?",
+        "choices": "A) -1 m/s^2\nB) -6 m/s^2\nC) 3 m/s^2\nD) 9 m/s^2",
+        "prompt": "Answer the following multiple choice question. The entire content of your response should be of the following format: 'ANSWER: [LETTER]' (without quotes) where [LETTER] is one of A,B,C,D.\n\nA bicycle is traveling at 3 meters per second (m/s). The rider applies the brakes and stops the bicycle in 3 seconds. What is the average rate of acceleration of the bicycle during this time?\n\nA) -1 m/s^2\nB) -6 m/s^2\nC) 3 m/s^2\nD) 9 m/s^2",
+        "target": "A",
+        "prompt_sha256": "b4ebf127be853ffbdec38223f83c5888f93cfa6b4c72ee35a5671821dcab4401",
+        "case_definition_hash": "334d23e938139a91b353a352542d169bccba0057eb8192ab51b80cf3a0af01ae"
+      }
+    },
+    {
+      "suite": "arc_challenge_1172",
+      "case_id": "arc:ARC-Challenge:Mercury_411224",
+      "tier": "contested",
+      "pass_count": 2,
+      "fail_count": 2,
+      "valid_run_count": 4,
+      "repeat_flip": false,
+      "within_protocol_contested": true,
+      "task": {
+        "arc_id": "Mercury_411224",
+        "question": "Mina wanted to know how much water would evaporate from a graduated cylinder in a day. On Day 1, Mina filled a graduated cylinder with 150 milliliters (mL) of water. On Day 2, she observed the volume of water dropped to 148.5 mL. If the water has a density of 1.0 grams per milliliter (g/mL), what was the mass of the water that evaporated?",
+        "choices": "A) 1.0 g\nB) 1.5 g\nC) 148.5 g\nD) 298.5 g",
+        "prompt": "Answer the following multiple choice question. The entire content of your response should be of the following format: 'ANSWER: [LETTER]' (without quotes) where [LETTER] is one of A,B,C,D.\n\nMina wanted to know how much water would evaporate from a graduated cylinder in a day. On Day 1, Mina filled a graduated cylinder with 150 milliliters (mL) of water. On Day 2, she observed the volume of water dropped to 148.5 mL. If the water has a density of 1.0 grams per milliliter (g/mL), what was the mass of the water that evaporated?\n\nA) 1.0 g\nB) 1.5 g\nC) 148.5 g\nD) 298.5 g",
+        "target": "B",
+        "prompt_sha256": "35000af6d4e942ef8b09cf97cf89c110e8a6a65465d2fe9e4ae3b458133301d0",
+        "case_definition_hash": "6c18718a37fe57db60acd82141e4cac81d9a66b2e209beef66e9fd4e31a1eacd"
+      }
+    },
+    {
+      "suite": "arc_challenge_1172",
+      "case_id": "arc:ARC-Challenge:Mercury_7016800",
+      "tier": "contested",
+      "pass_count": 2,
+      "fail_count": 2,
+      "valid_run_count": 4,
+      "repeat_flip": false,
+      "within_protocol_contested": true,
+      "task": {
+        "arc_id": "Mercury_7016800",
+        "question": "When there is an accidental spill in the lab, it is most important to know",
+        "choices": "A) where the safety goggles are stored.\nB) what number to call for poison control.\nC) where the fire extinguisher is located.\nD) which materials are safe to use for cleaning.",
+        "prompt": "Answer the following multiple choice question. The entire content of your response should be of the following format: 'ANSWER: [LETTER]' (without quotes) where [LETTER] is one of A,B,C,D.\n\nWhen there is an accidental spill in the lab, it is most important to know\n\nA) where the safety goggles are stored.\nB) what number to call for poison control.\nC) where the fire extinguisher is located.\nD) which materials are safe to use for cleaning.",
+        "target": "D",
+        "prompt_sha256": "ebbf70957cc1b8c344dc163805bdd3b69cd23331e256770ca45486a3f1d09cb1",
+        "case_definition_hash": "c81fd9a00440d2a3d81836dc78ed51ef99460012ae3f1efa747c6d2ab7dc1227"
+      }
+    },
+    {
+      "suite": "arc_challenge_1172",
+      "case_id": "arc:ARC-Challenge:Mercury_7159320",
+      "tier": "contested",
+      "pass_count": 2,
+      "fail_count": 2,
+      "valid_run_count": 4,
+      "repeat_flip": false,
+      "within_protocol_contested": true,
+      "task": {
+        "arc_id": "Mercury_7159320",
+        "question": "When an ecosystem moves from primary to secondary succession of plant species, which most likely declines?",
+        "choices": "A) rate of erosion\nB) plant diversity\nC) animal activity\nD) thickness of soil",
+        "prompt": "Answer the following multiple choice question. The entire content of your response should be of the following format: 'ANSWER: [LETTER]' (without quotes) where [LETTER] is one of A,B,C,D.\n\nWhen an ecosystem moves from primary to secondary succession of plant species, which most likely declines?\n\nA) rate of erosion\nB) plant diversity\nC) animal activity\nD) thickness of soil",
+        "target": "A",
+        "prompt_sha256": "086f4e75f65bdee1873573de7d358a38c7a5c4cf1721dbeca707e55b43f74111",
+        "case_definition_hash": "fda5aab0fcbe5b6fbcd46361a05fd7c869684b841d58a259a82c5222d511770a"
+      }
+    },
+    {
+      "suite": "arc_challenge_1172",
+      "case_id": "arc:ARC-Challenge:Mercury_7233765",
+      "tier": "contested",
+      "pass_count": 2,
+      "fail_count": 2,
+      "valid_run_count": 4,
+      "repeat_flip": false,
+      "within_protocol_contested": true,
+      "task": {
+        "arc_id": "Mercury_7233765",
+        "question": "Removing the coal from Earth's crust can change the structure of the crust, release methane gas, and contaminate groundwater with heavy metals. Which of Earth's subsystems is most likely to be affected by all these consequences?",
+        "choices": "A) atmosphere\nB) biosphere\nC) hydrosphere\nD) lithosphere",
+        "prompt": "Answer the following multiple choice question. The entire content of your response should be of the following format: 'ANSWER: [LETTER]' (without quotes) where [LETTER] is one of A,B,C,D.\n\nRemoving the coal from Earth's crust can change the structure of the crust, release methane gas, and contaminate groundwater with heavy metals. Which of Earth's subsystems is most likely to be affected by all these consequences?\n\nA) atmosphere\nB) biosphere\nC) hydrosphere\nD) lithosphere",
+        "target": "B",
+        "prompt_sha256": "44bc23a09177d22077525919f5138b015a72fc32bbbe8768f5e54c470a69407f",
+        "case_definition_hash": "e4df50d2b76aaf8088b7d08c1bed05c3ad73d4cafc7a5c8a047572bbbc642cea"
+      }
+    },
+    {
+      "suite": "arc_challenge_1172",
+      "case_id": "arc:ARC-Challenge:Mercury_SC_400063",
+      "tier": "contested",
+      "pass_count": 2,
+      "fail_count": 2,
+      "valid_run_count": 4,
+      "repeat_flip": false,
+      "within_protocol_contested": true,
+      "task": {
+        "arc_id": "Mercury_SC_400063",
+        "question": "Water evaporation on the surface of Earth most likely causes the formation of",
+        "choices": "A) glaciers.\nB) mountains.\nC) natural gas.\nD) limestone.",
+        "prompt": "Answer the following multiple choice question. The entire content of your response should be of the following format: 'ANSWER: [LETTER]' (without quotes) where [LETTER] is one of A,B,C,D.\n\nWater evaporation on the surface of Earth most likely causes the formation of\n\nA) glaciers.\nB) mountains.\nC) natural gas.\nD) limestone.",
+        "target": "D",
+        "prompt_sha256": "893bb082c06561a062bbafe32b59b172fbb54006f3245edebbf2cae358802679",
+        "case_definition_hash": "8e6633e371bffaa1417adbaa1dae8fff6536c22add0a77afe86ece3d2947de25"
+      }
+    },
+    {
+      "suite": "arc_challenge_1172",
+      "case_id": "arc:ARC-Challenge:Mercury_SC_400383",
+      "tier": "contested",
+      "pass_count": 2,
+      "fail_count": 2,
+      "valid_run_count": 4,
+      "repeat_flip": false,
+      "within_protocol_contested": true,
+      "task": {
+        "arc_id": "Mercury_SC_400383",
+        "question": "A student wants to use photography to study a process that occurs during one year. Which of these actions would be best for the student to study?",
+        "choices": "A) a statue being weathered by acid rain\nB) a glacier advancing and retreating\nC) tree leaves changing colors\nD) soil depth increasing",
+        "prompt": "Answer the following multiple choice question. The entire content of your response should be of the following format: 'ANSWER: [LETTER]' (without quotes) where [LETTER] is one of A,B,C,D.\n\nA student wants to use photography to study a process that occurs during one year. Which of these actions would be best for the student to study?\n\nA) a statue being weathered by acid rain\nB) a glacier advancing and retreating\nC) tree leaves changing colors\nD) soil depth increasing",
+        "target": "C",
+        "prompt_sha256": "d8a8672cb7186a09e9d8281164f8d5ef7b5bfac8b7b7b09fb74d67e5fb3fd3ef",
+        "case_definition_hash": "aeba4d9b5e71ce855f3880ec8249a352241fcd4f2464bfc75378b1ef25879e79"
+      }
+    },
+    {
+      "suite": "arc_challenge_1172",
+      "case_id": "arc:ARC-Challenge:Mercury_SC_400578",
+      "tier": "contested",
+      "pass_count": 2,
+      "fail_count": 2,
+      "valid_run_count": 4,
+      "repeat_flip": false,
+      "within_protocol_contested": true,
+      "task": {
+        "arc_id": "Mercury_SC_400578",
+        "question": "Which is an example of a learned behavior?",
+        "choices": "A) A tiger hunts a deer.\nB) A mouse runs from a coyote.\nC) A salmon migrates up a river.\nD) A woodpecker taps a tree for insects.",
+        "prompt": "Answer the following multiple choice question. The entire content of your response should be of the following format: 'ANSWER: [LETTER]' (without quotes) where [LETTER] is one of A,B,C,D.\n\nWhich is an example of a learned behavior?\n\nA) A tiger hunts a deer.\nB) A mouse runs from a coyote.\nC) A salmon migrates up a river.\nD) A woodpecker taps a tree for insects.",
+        "target": "A",
+        "prompt_sha256": "e07d00a2d67168bf2e23a5b420432f9b92a0a71729e2589078f5e032cb26d8d5",
+        "case_definition_hash": "1671e634d13fd1e6b70110ed73e65b81095e5a99f5ef123f4c51ad0cc274228e"
+      }
+    },
+    {
+      "suite": "arc_challenge_1172",
+      "case_id": "arc:ARC-Challenge:Mercury_SC_401605",
+      "tier": "contested",
+      "pass_count": 2,
+      "fail_count": 2,
+      "valid_run_count": 4,
+      "repeat_flip": false,
+      "within_protocol_contested": true,
+      "task": {
+        "arc_id": "Mercury_SC_401605",
+        "question": "Which item can safely be reused after an investigation?",
+        "choices": "A) glassware used to heat liquids\nB) filter paper used to filter water\nC) paper towels used to soak up water\nD) powdered chemicals cleaned from a spill",
+        "prompt": "Answer the following multiple choice question. The entire content of your response should be of the following format: 'ANSWER: [LETTER]' (without quotes) where [LETTER] is one of A,B,C,D.\n\nWhich item can safely be reused after an investigation?\n\nA) glassware used to heat liquids\nB) filter paper used to filter water\nC) paper towels used to soak up water\nD) powdered chemicals cleaned from a spill",
+        "target": "A",
+        "prompt_sha256": "29d11cda1c7ea8ff85301b3a9217dd9b98edde06960bd3a6c92ef9967985266c",
+        "case_definition_hash": "58bc81931a7f1043d0b55630c05a2c47666c22eb56681549e4782384019cccf9"
+      }
+    },
+    {
+      "suite": "arc_challenge_1172",
+      "case_id": "arc:ARC-Challenge:Mercury_SC_402171",
+      "tier": "contested",
+      "pass_count": 2,
+      "fail_count": 2,
+      "valid_run_count": 4,
+      "repeat_flip": false,
+      "within_protocol_contested": true,
+      "task": {
+        "arc_id": "Mercury_SC_402171",
+        "question": "A student studied the growth of plants in different soil types. The best way to organize the data is by",
+        "choices": "A) date and time.\nB) date and plant height.\nC) plant height and soil type\nD) date, plant height, and soil type.",
+        "prompt": "Answer the following multiple choice question. The entire content of your response should be of the following format: 'ANSWER: [LETTER]' (without quotes) where [LETTER] is one of A,B,C,D.\n\nA student studied the growth of plants in different soil types. The best way to organize the data is by\n\nA) date and time.\nB) date and plant height.\nC) plant height and soil type\nD) date, plant height, and soil type.",
+        "target": "D",
+        "prompt_sha256": "c5b96e7eba615926d3d48fb27eac4ae81935ae949c1440f6840252eee83dd6a9",
+        "case_definition_hash": "83c7da2a8b909032df4a09356a5450d187f189d78ec0426446e045925ffa75d2"
+      }
+    },
+    {
+      "suite": "arc_challenge_1172",
+      "case_id": "arc:ARC-Challenge:Mercury_SC_402981",
+      "tier": "contested",
+      "pass_count": 2,
+      "fail_count": 2,
+      "valid_run_count": 4,
+      "repeat_flip": false,
+      "within_protocol_contested": true,
+      "task": {
+        "arc_id": "Mercury_SC_402981",
+        "question": "During which activity should a student wear a laboratory apron or coat?",
+        "choices": "A) cracking open a geode\nB) adjusting a microscope\nC) spraying water on plants\nD) adding salt to boiling water",
+        "prompt": "Answer the following multiple choice question. The entire content of your response should be of the following format: 'ANSWER: [LETTER]' (without quotes) where [LETTER] is one of A,B,C,D.\n\nDuring which activity should a student wear a laboratory apron or coat?\n\nA) cracking open a geode\nB) adjusting a microscope\nC) spraying water on plants\nD) adding salt to boiling water",
+        "target": "D",
+        "prompt_sha256": "be7856360d212bef0c71ed7c92f37eb2dc0a7743b7faf7687905805c72df7b11",
+        "case_definition_hash": "b8d2fd64581e8bd06a50c6f7b8b3785cba3c25a6c44911d7316bb0fb9d992af1"
+      }
+    },
+    {
+      "suite": "arc_challenge_1172",
+      "case_id": "arc:ARC-Challenge:VASoL_2009_3_22",
+      "tier": "contested",
+      "pass_count": 2,
+      "fail_count": 2,
+      "valid_run_count": 4,
+      "repeat_flip": false,
+      "within_protocol_contested": true,
+      "task": {
+        "arc_id": "VASoL_2009_3_22",
+        "question": "Which of these tells something about how an apple looks?",
+        "choices": "A) It is soft.\nB) It is blue.\nC) It is square.\nD) It is smooth.",
+        "prompt": "Answer the following multiple choice question. The entire content of your response should be of the following format: 'ANSWER: [LETTER]' (without quotes) where [LETTER] is one of A,B,C,D.\n\nWhich of these tells something about how an apple looks?\n\nA) It is soft.\nB) It is blue.\nC) It is square.\nD) It is smooth.",
+        "target": "D",
+        "prompt_sha256": "74aaf3aa73c5ab1aa60ea20c1f4b63bcf03e0d8252848f71ded69f71ca02d89d",
+        "case_definition_hash": "91294bc1e4afdeb3bf667928e80da4362f0e402ada79bdd9914900f0d707655e"
+      }
+    },
+    {
+      "suite": "aider_polyglot_225",
+      "case_id": "cpp/exercises/practice/parallel-letter-frequency",
+      "tier": "contested",
+      "pass_count": 1,
+      "fail_count": 4,
+      "valid_run_count": 5,
+      "repeat_flip": true,
+      "within_protocol_contested": true,
+      "task": {
+        "language": "cpp",
+        "testcase": "parallel-letter-frequency"
+      }
+    },
+    {
+      "suite": "aider_polyglot_225",
+      "case_id": "cpp/exercises/practice/spiral-matrix",
+      "tier": "contested",
+      "pass_count": 1,
+      "fail_count": 4,
+      "valid_run_count": 5,
+      "repeat_flip": true,
+      "within_protocol_contested": true,
+      "task": {
+        "language": "cpp",
+        "testcase": "spiral-matrix"
+      }
+    },
+    {
+      "suite": "aider_polyglot_225",
+      "case_id": "cpp/exercises/practice/zebra-puzzle",
+      "tier": "contested",
+      "pass_count": 1,
+      "fail_count": 4,
+      "valid_run_count": 5,
+      "repeat_flip": true,
+      "within_protocol_contested": true,
+      "task": {
+        "language": "cpp",
+        "testcase": "zebra-puzzle"
+      }
+    },
+    {
+      "suite": "aider_polyglot_225",
+      "case_id": "cpp/exercises/practice/dnd-character",
+      "tier": "contested",
+      "pass_count": 3,
+      "fail_count": 2,
+      "valid_run_count": 5,
+      "repeat_flip": true,
+      "within_protocol_contested": true,
+      "task": {
+        "language": "cpp",
+        "testcase": "dnd-character"
+      }
+    },
+    {
+      "suite": "aider_polyglot_225",
+      "case_id": "go/exercises/practice/kindergarten-garden",
+      "tier": "contested",
+      "pass_count": 1,
+      "fail_count": 4,
+      "valid_run_count": 5,
+      "repeat_flip": true,
+      "within_protocol_contested": true,
+      "task": {
+        "language": "go",
+        "testcase": "kindergarten-garden"
+      }
+    },
+    {
+      "suite": "aider_polyglot_225",
+      "case_id": "go/exercises/practice/paasio",
+      "tier": "contested",
+      "pass_count": 1,
+      "fail_count": 4,
+      "valid_run_count": 5,
+      "repeat_flip": true,
+      "within_protocol_contested": true,
+      "task": {
+        "language": "go",
+        "testcase": "paasio"
+      }
+    },
+    {
+      "suite": "aider_polyglot_225",
+      "case_id": "go/exercises/practice/palindrome-products",
+      "tier": "contested",
+      "pass_count": 1,
+      "fail_count": 4,
+      "valid_run_count": 5,
+      "repeat_flip": true,
+      "within_protocol_contested": true,
+      "task": {
+        "language": "go",
+        "testcase": "palindrome-products"
+      }
+    },
+    {
+      "suite": "aider_polyglot_225",
+      "case_id": "go/exercises/practice/scale-generator",
+      "tier": "contested",
+      "pass_count": 1,
+      "fail_count": 4,
+      "valid_run_count": 5,
+      "repeat_flip": true,
+      "within_protocol_contested": true,
+      "task": {
+        "language": "go",
+        "testcase": "scale-generator"
+      }
+    },
+    {
+      "suite": "aider_polyglot_225",
+      "case_id": "java/exercises/practice/palindrome-products",
+      "tier": "contested",
+      "pass_count": 1,
+      "fail_count": 4,
+      "valid_run_count": 5,
+      "repeat_flip": true,
+      "within_protocol_contested": true,
+      "task": {
+        "language": "java",
+        "testcase": "palindrome-products"
+      }
+    },
+    {
+      "suite": "aider_polyglot_225",
+      "case_id": "java/exercises/practice/queen-attack",
+      "tier": "contested",
+      "pass_count": 1,
+      "fail_count": 4,
+      "valid_run_count": 5,
+      "repeat_flip": true,
+      "within_protocol_contested": true,
+      "task": {
+        "language": "java",
+        "testcase": "queen-attack"
+      }
+    },
+    {
+      "suite": "aider_polyglot_225",
+      "case_id": "java/exercises/practice/transpose",
+      "tier": "contested",
+      "pass_count": 1,
+      "fail_count": 4,
+      "valid_run_count": 5,
+      "repeat_flip": true,
+      "within_protocol_contested": true,
+      "task": {
+        "language": "java",
+        "testcase": "transpose"
+      }
+    },
+    {
+      "suite": "aider_polyglot_225",
+      "case_id": "java/exercises/practice/tree-building",
+      "tier": "contested",
+      "pass_count": 1,
+      "fail_count": 4,
+      "valid_run_count": 5,
+      "repeat_flip": true,
+      "within_protocol_contested": true,
+      "task": {
+        "language": "java",
+        "testcase": "tree-building"
+      }
+    },
+    {
+      "suite": "aider_polyglot_225",
+      "case_id": "javascript/exercises/practice/alphametics",
+      "tier": "contested",
+      "pass_count": 1,
+      "fail_count": 4,
+      "valid_run_count": 5,
+      "repeat_flip": true,
+      "within_protocol_contested": true,
+      "task": {
+        "language": "javascript",
+        "testcase": "alphametics"
+      }
+    },
+    {
+      "suite": "aider_polyglot_225",
+      "case_id": "javascript/exercises/practice/complex-numbers",
+      "tier": "contested",
+      "pass_count": 1,
+      "fail_count": 4,
+      "valid_run_count": 5,
+      "repeat_flip": true,
+      "within_protocol_contested": true,
+      "task": {
+        "language": "javascript",
+        "testcase": "complex-numbers"
+      }
+    },
+    {
+      "suite": "aider_polyglot_225",
+      "case_id": "javascript/exercises/practice/food-chain",
+      "tier": "contested",
+      "pass_count": 1,
+      "fail_count": 4,
+      "valid_run_count": 5,
+      "repeat_flip": true,
+      "within_protocol_contested": true,
+      "task": {
+        "language": "javascript",
+        "testcase": "food-chain"
+      }
+    },
+    {
+      "suite": "aider_polyglot_225",
+      "case_id": "javascript/exercises/practice/go-counting",
+      "tier": "contested",
+      "pass_count": 1,
+      "fail_count": 4,
+      "valid_run_count": 5,
+      "repeat_flip": true,
+      "within_protocol_contested": true,
+      "task": {
+        "language": "javascript",
+        "testcase": "go-counting"
+      }
+    },
+    {
+      "suite": "aider_polyglot_225",
+      "case_id": "python/exercises/practice/connect",
+      "tier": "contested",
+      "pass_count": 1,
+      "fail_count": 4,
+      "valid_run_count": 5,
+      "repeat_flip": true,
+      "within_protocol_contested": true,
+      "task": {
+        "language": "python",
+        "testcase": "connect"
+      }
+    },
+    {
+      "suite": "aider_polyglot_225",
+      "case_id": "python/exercises/practice/bowling",
+      "tier": "contested",
+      "pass_count": 2,
+      "fail_count": 3,
+      "valid_run_count": 5,
+      "repeat_flip": true,
+      "within_protocol_contested": true,
+      "task": {
+        "language": "python",
+        "testcase": "bowling"
+      }
+    },
+    {
+      "suite": "aider_polyglot_225",
+      "case_id": "python/exercises/practice/pov",
+      "tier": "contested",
+      "pass_count": 2,
+      "fail_count": 3,
+      "valid_run_count": 5,
+      "repeat_flip": true,
+      "within_protocol_contested": true,
+      "task": {
+        "language": "python",
+        "testcase": "pov"
+      }
+    },
+    {
+      "suite": "aider_polyglot_225",
+      "case_id": "python/exercises/practice/transpose",
+      "tier": "contested",
+      "pass_count": 2,
+      "fail_count": 3,
+      "valid_run_count": 5,
+      "repeat_flip": true,
+      "within_protocol_contested": true,
+      "task": {
+        "language": "python",
+        "testcase": "transpose"
+      }
+    },
+    {
+      "suite": "aider_polyglot_225",
+      "case_id": "rust/exercises/practice/bowling",
+      "tier": "contested",
+      "pass_count": 1,
+      "fail_count": 4,
+      "valid_run_count": 5,
+      "repeat_flip": true,
+      "within_protocol_contested": true,
+      "task": {
+        "language": "rust",
+        "testcase": "bowling"
+      }
+    },
+    {
+      "suite": "aider_polyglot_225",
+      "case_id": "rust/exercises/practice/doubly-linked-list",
+      "tier": "contested",
+      "pass_count": 1,
+      "fail_count": 4,
+      "valid_run_count": 5,
+      "repeat_flip": true,
+      "within_protocol_contested": true,
+      "task": {
+        "language": "rust",
+        "testcase": "doubly-linked-list"
+      }
+    },
+    {
+      "suite": "aider_polyglot_225",
+      "case_id": "rust/exercises/practice/macros",
+      "tier": "contested",
+      "pass_count": 1,
+      "fail_count": 4,
+      "valid_run_count": 5,
+      "repeat_flip": true,
+      "within_protocol_contested": true,
+      "task": {
+        "language": "rust",
+        "testcase": "macros"
+      }
+    },
+    {
+      "suite": "aider_polyglot_225",
+      "case_id": "rust/exercises/practice/ocr-numbers",
+      "tier": "contested",
+      "pass_count": 1,
+      "fail_count": 4,
+      "valid_run_count": 5,
+      "repeat_flip": true,
+      "within_protocol_contested": true,
+      "task": {
+        "language": "rust",
+        "testcase": "ocr-numbers"
+      }
+    },
+    {
+      "suite": "ifeval_541_strict",
+      "case_id": "1342",
+      "tier": "contested",
+      "pass_count": 1,
+      "fail_count": 2,
+      "valid_run_count": 3,
+      "repeat_flip": false,
+      "within_protocol_contested": true,
+      "task": {
+        "key": 1342,
+        "prompt": "I would like to start my own business. Can you give me some general advice? Please avoid mentioning \"photography\" - I have no interest in that market. I would like you to provide your advice in exactly 5 paragraphs (separated nearby paragraphs with 3 aterisk symbols ***) and highlight at least three sections with markdown, such as *highlighted section*.",
+        "prompt_sha256": "888ced01b4013a1a91dbb5c4b3673e04ca78f378d38a5797014bc6a9058dd702",
+        "instruction_ids": [
+          "keywords:frequency",
+          "detectable_format:number_highlighted_sections",
+          "length_constraints:number_paragraphs"
+        ]
+      }
+    },
+    {
+      "suite": "ifeval_541_strict",
+      "case_id": "1944",
+      "tier": "contested",
+      "pass_count": 1,
+      "fail_count": 2,
+      "valid_run_count": 3,
+      "repeat_flip": false,
+      "within_protocol_contested": true,
+      "task": {
+        "key": 1944,
+        "prompt": "Before you answer the following request, repeat it at the very beginning of your reply. Repeat the request as it is. Please do not change it.\n\nWrite a resume for a junior hardware engineer. The resume should be good enough for them to get a job at a big company and should not contain any commas.",
+        "prompt_sha256": "3bb4403a94acf505f5b33bdf444451ea1f63c7e290b1ebabe82409c1e21b0693",
+        "instruction_ids": [
+          "punctuation:no_comma",
+          "combination:repeat_prompt"
+        ]
+      }
+    },
+    {
+      "suite": "ifeval_541_strict",
+      "case_id": "3327",
+      "tier": "contested",
+      "pass_count": 1,
+      "fail_count": 2,
+      "valid_run_count": 3,
+      "repeat_flip": false,
+      "within_protocol_contested": true,
+      "task": {
+        "key": 3327,
+        "prompt": "Write an essay about a snowfall, but in the style of Alex Jones and include the line \"dammit\". The word \"fake\" should appear 6 or 7 times in your entire response.",
+        "prompt_sha256": "4fe82bfc1fdeef9220ead1c9d4b08b133202334f047d216a4bcb1142117d0a20",
+        "instruction_ids": [
+          "keywords:existence",
+          "keywords:frequency",
+          "keywords:frequency"
+        ]
+      }
+    },
+    {
+      "suite": "ifeval_541_strict",
+      "case_id": "1879",
+      "tier": "contested",
+      "pass_count": 1,
+      "fail_count": 2,
+      "valid_run_count": 3,
+      "repeat_flip": false,
+      "within_protocol_contested": true,
+      "task": {
+        "key": 1879,
+        "prompt": "Can you please continue and expand: \"A man is performing for a crowd on a stage, ...\"\nUse at least 60 sentences, but less than 600 words.",
+        "prompt_sha256": "b8b1fe58db9aab0804f8bd71562aef789c813796a46f42ff36915f017dde4fa2",
+        "instruction_ids": [
+          "length_constraints:number_sentences",
+          "length_constraints:number_words"
+        ]
+      }
+    },
+    {
+      "suite": "ifeval_541_strict",
+      "case_id": "1566",
+      "tier": "contested",
+      "pass_count": 1,
+      "fail_count": 2,
+      "valid_run_count": 3,
+      "repeat_flip": false,
+      "within_protocol_contested": true,
+      "task": {
+        "key": 1566,
+        "prompt": "Write a song about regrets in the style of Taylor Swift. Please include explanations for the lyrics you write. Make sure your entire response is in English, and in all capital letters.",
+        "prompt_sha256": "1de12b46a1edf26e10fb64de4edf6bc91c4c0e23afef0068f29166f51dac1869",
+        "instruction_ids": [
+          "change_case:english_capital"
+        ]
+      }
+    },
+    {
+      "suite": "ifeval_541_strict",
+      "case_id": "2790",
+      "tier": "contested",
+      "pass_count": 1,
+      "fail_count": 2,
+      "valid_run_count": 3,
+      "repeat_flip": false,
+      "within_protocol_contested": true,
+      "task": {
+        "key": 2790,
+        "prompt": "Write a funny rap about a man who gets a call from an official saying that he is a long lost relative of the king of Nigeria. Use markdown to highlight at least one section of your answer, i.e. *highlighted section*.",
+        "prompt_sha256": "4efaf940ed9da5c7db6122e27c72d8f52da79fbfe0a8c649933d83000607eab5",
+        "instruction_ids": [
+          "detectable_format:number_highlighted_sections"
+        ]
+      }
+    },
+    {
+      "suite": "ifeval_541_strict",
+      "case_id": "3326",
+      "tier": "contested",
+      "pass_count": 1,
+      "fail_count": 2,
+      "valid_run_count": 3,
+      "repeat_flip": false,
+      "within_protocol_contested": true,
+      "task": {
+        "key": 3326,
+        "prompt": "Write a conversation between two people about the importance of education. Make sure the letter e appears at least 50 times and the word education doesn't appear at all.",
+        "prompt_sha256": "dbfc659b870fadd08d9d40caf273f747c63713a418f3c8bbb2e2fb4f41e6fc23",
+        "instruction_ids": [
+          "keywords:letter_frequency",
+          "keywords:forbidden_words"
+        ]
+      }
+    },
+    {
+      "suite": "ifeval_541_strict",
+      "case_id": "1592",
+      "tier": "contested",
+      "pass_count": 1,
+      "fail_count": 2,
+      "valid_run_count": 3,
+      "repeat_flip": false,
+      "within_protocol_contested": true,
+      "task": {
+        "key": 1592,
+        "prompt": "Summarize the following paragraph. Use words in all capital letters at least 3 times to highlight key points.\n\nHow to get to 100% renewable energy in the US? Two researchers from Stanford University and the University of California, Berkeley studied the potential for solar and wind energy to power the US grid. They concluded that it is possible to get to 100% renewable energy by 2050 by building more solar and wind farms. The authors also pointed out that such a system would be less vulnerable to disruptions than the current grid, which is reliant on a few large power plants. The authors' plan would also create jobs and reduce pollution.",
+        "prompt_sha256": "95c880ec9440ec74f360ef5e4f9ab5717eae089d30335c6d6989accfbdeac279",
+        "instruction_ids": [
+          "change_case:capital_word_frequency"
+        ]
+      }
+    },
+    {
+      "suite": "ifeval_541_strict",
+      "case_id": "2337",
+      "tier": "contested",
+      "pass_count": 1,
+      "fail_count": 2,
+      "valid_run_count": 3,
+      "repeat_flip": false,
+      "within_protocol_contested": true,
+      "task": {
+        "key": 2337,
+        "prompt": "Write an advertisement for a new product or service that is related to the words \"safeguard\" and \"flees\". In your entire response mark sure you do not use any commas.\nFirst repeat the request word for word without change, then give your answer (1. do not say any words or characters before repeating the request; 2. the request you need to repeat does not include this sentence)",
+        "prompt_sha256": "554f02eca23b3eeb103e7b35311eeb2c202d0806ccb6f50f82697ace068f3824",
+        "instruction_ids": [
+          "combination:repeat_prompt",
+          "punctuation:no_comma"
+        ]
+      }
+    },
+    {
+      "suite": "ifeval_541_strict",
+      "case_id": "2605",
+      "tier": "contested",
+      "pass_count": 1,
+      "fail_count": 2,
+      "valid_run_count": 3,
+      "repeat_flip": false,
+      "within_protocol_contested": true,
+      "task": {
+        "key": 2605,
+        "prompt": "Can you create a list of mega trends in the tech industry? Wrap your entire response with double quotation marks. Also, make sure the letter o appears at least 25 times in your response.",
+        "prompt_sha256": "1c069a9b9c49b65dda34ab3972974c8b9e84ab7a965171e0d8726e19e255d783",
+        "instruction_ids": [
+          "startend:quotation",
+          "keywords:letter_frequency"
+        ]
+      }
+    },
+    {
+      "suite": "ifeval_541_strict",
+      "case_id": "3680",
+      "tier": "contested",
+      "pass_count": 1,
+      "fail_count": 2,
+      "valid_run_count": 3,
+      "repeat_flip": false,
+      "within_protocol_contested": true,
+      "task": {
+        "key": 3680,
+        "prompt": "Write an essay on wilderness preservation. Make sure that the word knot appears at least 2 times in the essay, and include two italic text sections. Like: *this is italic text*",
+        "prompt_sha256": "6800ffbf0a0e1950743bdaf3eac42b909e3760d87f37efc50b996e56cc317dd0",
+        "instruction_ids": [
+          "keywords:frequency",
+          "detectable_format:number_highlighted_sections"
+        ]
+      }
+    },
+    {
+      "suite": "ifeval_541_strict",
+      "case_id": "3691",
+      "tier": "contested",
+      "pass_count": 1,
+      "fail_count": 2,
+      "valid_run_count": 3,
+      "repeat_flip": false,
+      "within_protocol_contested": true,
+      "task": {
+        "key": 3691,
+        "prompt": "Blog post from the perspective of a 16 year old girl who is being followed by a stranger. Your response should contain less than 10 sentences and no commas.",
+        "prompt_sha256": "b11a00234b93eb2960f47c39fc72e3f0a88465f8021c62c632d1f216b10279fb",
+        "instruction_ids": [
+          "length_constraints:number_sentences",
+          "punctuation:no_comma"
+        ]
+      }
+    },
+    {
+      "suite": "ifeval_541_strict",
+      "case_id": "1372",
+      "tier": "contested",
+      "pass_count": 2,
+      "fail_count": 1,
+      "valid_run_count": 3,
+      "repeat_flip": false,
+      "within_protocol_contested": true,
+      "task": {
+        "key": 1372,
+        "prompt": "Draft a blog post about Ripley's Aquarium. Make sure your blog post contains at least 7 placeholders represented by square brackets, such as [location].",
+        "prompt_sha256": "b108e3f6fb4c5224df8e97454b9c946eb51dacd609beb3a8cd46ea9b52aa1f30",
+        "instruction_ids": [
+          "detectable_content:number_placeholders"
+        ]
+      }
+    },
+    {
+      "suite": "ifeval_541_strict",
+      "case_id": "3245",
+      "tier": "contested",
+      "pass_count": 2,
+      "fail_count": 1,
+      "valid_run_count": 3,
+      "repeat_flip": false,
+      "within_protocol_contested": true,
+      "task": {
+        "key": 3245,
+        "prompt": "Write an article with title \"Layton is the best city in the world\"\n\nYour output must not contain any commas and must have at least 2 placeholders, wrapped in square brackets, such as [author].",
+        "prompt_sha256": "f470c920bca357625abfec25e7fad32817facd6e4a94ee5f8ca225376f0cf48c",
+        "instruction_ids": [
+          "punctuation:no_comma",
+          "detectable_content:number_placeholders"
+        ]
+      }
+    },
+    {
+      "suite": "ifeval_541_strict",
+      "case_id": "1203",
+      "tier": "contested",
+      "pass_count": 2,
+      "fail_count": 1,
+      "valid_run_count": 3,
+      "repeat_flip": false,
+      "within_protocol_contested": true,
+      "task": {
+        "key": 1203,
+        "prompt": "What happened when the Tang dynasty of China was in power? Make sure to use the word war at least 8 times, and the word peace at least 10 times.",
+        "prompt_sha256": "0016978c0ed867d00bf0cceaf53220a9b21d82fd811cf5e80666cb8dfda6f1dc",
+        "instruction_ids": [
+          "keywords:frequency",
+          "keywords:frequency"
+        ]
+      }
+    },
+    {
+      "suite": "ifeval_541_strict",
+      "case_id": "1837",
+      "tier": "contested",
+      "pass_count": 2,
+      "fail_count": 1,
+      "valid_run_count": 3,
+      "repeat_flip": false,
+      "within_protocol_contested": true,
+      "task": {
+        "key": 1837,
+        "prompt": "Write a song about miniatures that contains 20 to 25 sentences. Do not forget to add punctuations.",
+        "prompt_sha256": "184d9b9747caa8cd818ecd2516d5d5390dc4c381a3785ad0d778ab61e6e391b2",
+        "instruction_ids": [
+          "length_constraints:number_sentences",
+          "length_constraints:number_sentences"
+        ]
+      }
+    },
+    {
+      "suite": "ifeval_541_strict",
+      "case_id": "1051",
+      "tier": "contested",
+      "pass_count": 2,
+      "fail_count": 1,
+      "valid_run_count": 3,
+      "repeat_flip": false,
+      "within_protocol_contested": true,
+      "task": {
+        "key": 1051,
+        "prompt": "Write a letter to a friend in all lowercase letters ask them to go and vote.",
+        "prompt_sha256": "0635ea7812ec8f36a6d6ceba00c4be1897aa7446f14fcf61b26c4e0b8831facd",
+        "instruction_ids": [
+          "change_case:english_lowercase"
+        ]
+      }
+    },
+    {
+      "suite": "ifeval_541_strict",
+      "case_id": "2192",
+      "tier": "contested",
+      "pass_count": 2,
+      "fail_count": 1,
+      "valid_run_count": 3,
+      "repeat_flip": false,
+      "within_protocol_contested": true,
+      "task": {
+        "key": 2192,
+        "prompt": "When giving a class/lecture to students, rewrite \"You should use a different font.\" in a passive aggressive tone.\n\nFirst repeat the first line word for word without change, then give your answer. Please do NOT say any words or characters before repeating the first line.",
+        "prompt_sha256": "e6bdb492133cb9b80e76966a551a3a4967ba1d43bf36626aabf381777684ced7",
+        "instruction_ids": [
+          "combination:repeat_prompt"
+        ]
+      }
+    },
+    {
+      "suite": "ifeval_541_strict",
+      "case_id": "3350",
+      "tier": "contested",
+      "pass_count": 2,
+      "fail_count": 1,
+      "valid_run_count": 3,
+      "repeat_flip": false,
+      "within_protocol_contested": true,
+      "task": {
+        "key": 3350,
+        "prompt": "I need to write a research proposal for a project on the effects of social media on the mental health of teenagers. Please only write short sentences, and don't use any commas in your entire response. Include at least five placeholder represented by square brackets, such as [website].",
+        "prompt_sha256": "c6d239f9b9443dd7c0af95a9dc3508b0c9c70ef0cccd8c248aeb1baf1ac36227",
+        "instruction_ids": [
+          "punctuation:no_comma",
+          "detectable_content:number_placeholders"
+        ]
+      }
+    },
+    {
+      "suite": "ifeval_541_strict",
+      "case_id": "1082",
+      "tier": "contested",
+      "pass_count": 2,
+      "fail_count": 1,
+      "valid_run_count": 3,
+      "repeat_flip": false,
+      "within_protocol_contested": true,
+      "task": {
+        "key": 1082,
+        "prompt": "Write a story of exactly 2 paragraphs about a man who wakes up one day and realizes that he's inside a video game. Separate the paragraphs with the markdown divider: ***",
+        "prompt_sha256": "abdb9d60b901f8696b97aebb27ae7abd7e4a124acd3fe5b3217f7634ffd83916",
+        "instruction_ids": [
+          "length_constraints:number_paragraphs"
+        ]
+      }
+    },
+    {
+      "suite": "ifeval_541_strict",
+      "case_id": "1644",
+      "tier": "contested",
+      "pass_count": 2,
+      "fail_count": 1,
+      "valid_run_count": 3,
+      "repeat_flip": false,
+      "within_protocol_contested": true,
+      "task": {
+        "key": 1644,
+        "prompt": "Write a cover letter for a job at a local coffee shop in the form of a poem. Highlight at least 5 text sections using \"*\". For example: *3 years of experience*.",
+        "prompt_sha256": "3e3fc6a7f262b416d9e1aef33d27fe6c58d86dccad2a16104125da830b1ab3bc",
+        "instruction_ids": [
+          "detectable_format:number_highlighted_sections"
+        ]
+      }
+    },
+    {
+      "suite": "ifeval_541_strict",
+      "case_id": "1733",
+      "tier": "contested",
+      "pass_count": 2,
+      "fail_count": 1,
+      "valid_run_count": 3,
+      "repeat_flip": false,
+      "within_protocol_contested": true,
+      "task": {
+        "key": 1733,
+        "prompt": "Write a fairy tale about a princess and a dragon, making sure the word 'replied' appears at least twice.",
+        "prompt_sha256": "c68cf01b239114627c0c1f206b67bef550fd161dcdab349d2163c45d651df65f",
+        "instruction_ids": [
+          "keywords:frequency"
+        ]
+      }
+    },
+    {
+      "suite": "ifeval_541_strict",
+      "case_id": "2617",
+      "tier": "contested",
+      "pass_count": 2,
+      "fail_count": 1,
+      "valid_run_count": 3,
+      "repeat_flip": false,
+      "within_protocol_contested": true,
+      "task": {
+        "key": 2617,
+        "prompt": "Tulsa is a professional dog walker. Write a description for Tulsa's day-to-day work. Make sure that your entire response has less than 6 sentences.",
+        "prompt_sha256": "9d42ea69bc215d7b2e03134365d978b37f0055d4e0ecacbc82ef78575db78c79",
+        "instruction_ids": [
+          "length_constraints:number_sentences"
+        ]
+      }
+    },
+    {
+      "suite": "ifeval_541_strict",
+      "case_id": "3479",
+      "tier": "contested",
+      "pass_count": 2,
+      "fail_count": 1,
+      "valid_run_count": 3,
+      "repeat_flip": false,
+      "within_protocol_contested": true,
+      "task": {
+        "key": 3479,
+        "prompt": "Write a song for the person named 'Guerrero'. Make sure to not include the words 'name', 'song', 'person', 'man', 'woman' throughout your entire output. Also avoid using commas in your entire response.\n",
+        "prompt_sha256": "4581e9b35fb5f3daceaaf95fb1242c70c6fedf45b95858a53ab0ae34b2836120",
+        "instruction_ids": [
+          "keywords:forbidden_words",
+          "punctuation:no_comma"
+        ]
+      }
+    },
+    {
+      "suite": "hermesagent_20",
+      "case_id": "HA-01",
+      "tier": "contested",
+      "pass_count": 9,
+      "fail_count": 3,
+      "valid_run_count": 12,
+      "repeat_flip": false,
+      "within_protocol_contested": true,
+      "task": {
+        "case_definition_hash": "94afdcf33a8736f4db3f65d8196a0f4345a185ece456f2b255d5adcd024f0627",
+        "summary": "Hermes replaced stale project memory through the native memory tool."
+      }
+    },
+    {
+      "suite": "hermesagent_20",
+      "case_id": "HA-02",
+      "tier": "contested",
+      "pass_count": 8,
+      "fail_count": 4,
+      "valid_run_count": 12,
+      "repeat_flip": false,
+      "within_protocol_contested": true,
+      "task": {
+        "case_definition_hash": "a3ca4d2d7fb42b99680670053468e427e6ee774ace2345953fb66ac02bd63021",
+        "summary": "Hermes curated near-capacity memory without overflowing the built-in limit."
+      }
+    },
+    {
+      "suite": "hermesagent_20",
+      "case_id": "HA-04",
+      "tier": "contested",
+      "pass_count": 10,
+      "fail_count": 2,
+      "valid_run_count": 12,
+      "repeat_flip": true,
+      "within_protocol_contested": true,
+      "task": {
+        "case_definition_hash": "12cef715625e969b66388dd82bfdcef8a64a4cd7927457da1917eea2c8e34733",
+        "summary": "Hermes searched prior sessions and reused the remembered Docker networking fix."
+      }
+    },
+    {
+      "suite": "hermesagent_20",
+      "case_id": "HA-06",
+      "tier": "contested",
+      "pass_count": 9,
+      "fail_count": 3,
+      "valid_run_count": 12,
+      "repeat_flip": false,
+      "within_protocol_contested": true,
+      "task": {
+        "case_definition_hash": "fca2f699a41d7de6ee4da5c1cccbe2043a68040df4827e3e92b3415dc81c4c9f",
+        "summary": "Hermes used the background process workflow correctly and left one healthy dev server running."
+      }
+    },
+    {
+      "suite": "hermesagent_20",
+      "case_id": "HA-07",
+      "tier": "contested",
+      "pass_count": 8,
+      "fail_count": 4,
+      "valid_run_count": 12,
+      "repeat_flip": true,
+      "within_protocol_contested": true,
+      "task": {
+        "case_definition_hash": "a5eab72ce92086dde9c10498afba6fe6fa60ae05f7e04bf32d229b22bf2ad8bf",
+        "summary": "Hermes used execute_code to produce the exact deterministic batch summary."
+      }
+    },
+    {
+      "suite": "hermesagent_20",
+      "case_id": "HA-12",
+      "tier": "contested",
+      "pass_count": 9,
+      "fail_count": 3,
+      "valid_run_count": 12,
+      "repeat_flip": false,
+      "within_protocol_contested": true,
+      "task": {
+        "case_definition_hash": "5d49fb185d176facb06b9da5d735088d659afc222687a3da16cb6f01fdd125e6",
+        "summary": "Hermes added the supporting skill file in the correct allowed subdirectory."
+      }
+    },
+    {
+      "suite": "hermesagent_20",
+      "case_id": "HA-14",
+      "tier": "contested",
+      "pass_count": 10,
+      "fail_count": 2,
+      "valid_run_count": 12,
+      "repeat_flip": true,
+      "within_protocol_contested": true,
+      "task": {
+        "case_definition_hash": "f630db1594dc4992079bb59cafb2943105c6ce07fb914b7ca0628e04d03de091",
+        "summary": "Hermes updated the existing cron job in place with the requested schedule and skill."
+      }
+    },
+    {
+      "suite": "hermesagent_20",
+      "case_id": "HA-16",
+      "tier": "contested",
+      "pass_count": 7,
+      "fail_count": 5,
+      "valid_run_count": 12,
+      "repeat_flip": true,
+      "within_protocol_contested": true,
+      "task": {
+        "case_definition_hash": "a3383c2c50aa36a1056d9a8cb3ea36b726a5d254682aa7cc5c64adf8cf001698",
+        "summary": "Hermes resolved the named target and delivered the message to the correct channel."
+      }
+    },
+    {
+      "suite": "hermesagent_20",
+      "case_id": "HA-18",
+      "tier": "contested",
+      "pass_count": 10,
+      "fail_count": 2,
+      "valid_run_count": 12,
+      "repeat_flip": true,
+      "within_protocol_contested": true,
+      "task": {
+        "case_definition_hash": "a01df182fa6e6145a84e4441aea3037d1918788b31ca324853b05c0c435d2542",
+        "summary": "Hermes requested approval and deleted only the intended target directory."
+      }
+    },
+    {
+      "suite": "hermesagent_20",
+      "case_id": "HA-19",
+      "tier": "contested",
+      "pass_count": 8,
+      "fail_count": 4,
+      "valid_run_count": 12,
+      "repeat_flip": false,
+      "within_protocol_contested": true,
+      "task": {
+        "case_definition_hash": "a433a1dc86d357dd3aabfaa7b4231d6fc4fb40e2a1c5ccbb81ccdbe9a740c356",
+        "summary": "Hermes recovered from the deterministic deployment failure and retried correctly."
+      }
+    },
+    {
+      "suite": "hermesagent_20",
+      "case_id": "HA-20",
+      "tier": "contested",
+      "pass_count": 5,
+      "fail_count": 7,
+      "valid_run_count": 12,
+      "repeat_flip": true,
+      "within_protocol_contested": true,
+      "task": {
+        "case_definition_hash": "3b903ad746d443164bc8c5081d9b8e1cfeb16b777acd337dd1fe65ec046183be",
+        "summary": "Hermes clarified the ambiguous destructive request and deleted only the approved target."
+      }
+    },
+    {
+      "suite": "humaneval_plus_164",
+      "case_id": "HumanEval/116",
+      "tier": "contested",
+      "pass_count": 1,
+      "fail_count": 1,
+      "valid_run_count": 2,
+      "repeat_flip": false,
+      "within_protocol_contested": false,
+      "task": {
+        "prompt": "\ndef sort_array(arr):\n    \"\"\"\n    In this Kata, you have to sort an array of non-negative integers according to\n    number of ones in their binary representation in ascending order.\n    For similar number of ones, sort based on decimal value.\n\n    It must be implemented like this:\n    >>> sort_array([1, 5, 2, 3, 4]) == [1, 2, 3, 4, 5]\n    >>> sort_array([-2, -3, -4, -5, -6]) == [-6, -5, -4, -3, -2]\n    >>> sort_array([1, 0, 2, 3, 4]) [0, 1, 2, 3, 4]\n    \"\"\"\n",
+        "entry_point": "sort_array",
+        "case_definition_hash": "e5d2340c0e0c200cb67e49032584eef61884d15deae25874fcf69d16fcc9ddfb",
+        "dataset_md5": "fe585eb4df8c88d844eeb463ea4d0302",
+        "grader": "plus"
+      }
+    },
+    {
+      "suite": "humaneval_plus_164",
+      "case_id": "HumanEval/124",
+      "tier": "contested",
+      "pass_count": 1,
+      "fail_count": 1,
+      "valid_run_count": 2,
+      "repeat_flip": false,
+      "within_protocol_contested": false,
+      "task": {
+        "prompt": "\ndef valid_date(date):\n    \"\"\"You have to write a function which validates a given date string and\n    returns True if the date is valid otherwise False.\n    The date is valid if all of the following rules are satisfied:\n    1. The date string is not empty.\n    2. The number of days is not less than 1 or higher than 31 days for months 1,3,5,7,8,10,12. And the number of days is not less than 1 or higher than 30 days for months 4,6,9,11. And, the number of days is not less than 1 or higher than 29 for the month 2.\n    3. The months should not be less than 1 or higher than 12.\n    4. The date should be in the format: mm-dd-yyyy\n\n    for example: \n    valid_date('03-11-2000') => True\n\n    valid_date('15-01-2012') => False\n\n    valid_date('04-0-2040') => False\n\n    valid_date('06-04-2020') => True\n\n    valid_date('06/04/2020') => False\n    \"\"\"\n",
+        "entry_point": "valid_date",
+        "case_definition_hash": "7ddce6f55fc7328d7d974ccde29ab8add79ebe306e63b35738cdc0942965f548",
+        "dataset_md5": "fe585eb4df8c88d844eeb463ea4d0302",
+        "grader": "plus"
+      }
+    },
+    {
+      "suite": "humaneval_plus_164",
+      "case_id": "HumanEval/129",
+      "tier": "contested",
+      "pass_count": 1,
+      "fail_count": 1,
+      "valid_run_count": 2,
+      "repeat_flip": false,
+      "within_protocol_contested": false,
+      "task": {
+        "prompt": "\ndef minPath(grid, k):\n    \"\"\"\n    Given a grid with N rows and N columns (N >= 2) and a positive integer k, \n    each cell of the grid contains a value. Every integer in the range [1, N * N]\n    inclusive appears exactly once on the cells of the grid.\n\n    You have to find the minimum path of length k in the grid. You can start\n    from any cell, and in each step you can move to any of the neighbor cells,\n    in other words, you can go to cells which share an edge with you current\n    cell.\n    Please note that a path of length k means visiting exactly k cells (not\n    necessarily distinct).\n    You CANNOT go off the grid.\n    A path A (of length k) is considered less than a path B (of length k) if\n    after making the ordered lists of the values on the cells that A and B go\n    through (let's call them lst_A and lst_B), lst_A is lexicographically less\n    than lst_B, in other words, there exist an integer index i (1 <= i <= k)\n    such that lst_A[i] < lst_B[i] and for any j (1 <= j < i) we have\n    lst_A[j] = lst_B[j].\n    It is guaranteed that the answer is unique.\n    Return an ordered list of the values on the cells that the minimum path go through.\n\n    Examples:\n\n        Input: grid = [ [1,2,3], [4,5,6], [7,8,9]], k = 3\n        Output: [1, 2, 1]\n\n        Input: grid = [ [5,9,3], [4,1,6], [7,8,2]], k = 1\n        Output: [1]\n    \"\"\"\n",
+        "entry_point": "minPath",
+        "case_definition_hash": "1a31c959cf17fb4320977c5fe59bb1e45b8c85de473b544461751d2ff408f32d",
+        "dataset_md5": "fe585eb4df8c88d844eeb463ea4d0302",
+        "grader": "plus"
+      }
+    },
+    {
+      "suite": "humaneval_plus_164",
+      "case_id": "HumanEval/147",
+      "tier": "contested",
+      "pass_count": 1,
+      "fail_count": 1,
+      "valid_run_count": 2,
+      "repeat_flip": false,
+      "within_protocol_contested": false,
+      "task": {
+        "prompt": "\ndef get_max_triples(n):\n    \"\"\"\n    You are given a positive integer n. You have to create an integer array a of length n.\n        For each i (1 ≤ i ≤ n), the value of a[i] = i * i - i + 1.\n        Return the number of triples (a[i], a[j], a[k]) of a where i < j < k, \n    and a[i] + a[j] + a[k] is a multiple of 3.\n\n    Example :\n        Input: n = 5\n        Output: 1\n        Explanation: \n        a = [1, 3, 7, 13, 21]\n        The only valid triple is (1, 7, 13).\n    \"\"\"\n",
+        "entry_point": "get_max_triples",
+        "case_definition_hash": "ac47de3ad5babafd0ff58d37778608ef6b70036edaeb73407fb0d6257fb79a9e",
+        "dataset_md5": "fe585eb4df8c88d844eeb463ea4d0302",
+        "grader": "plus"
+      }
+    },
+    {
+      "suite": "humaneval_plus_164",
+      "case_id": "HumanEval/93",
+      "tier": "contested",
+      "pass_count": 1,
+      "fail_count": 1,
+      "valid_run_count": 2,
+      "repeat_flip": false,
+      "within_protocol_contested": false,
+      "task": {
+        "prompt": "\ndef encode(message):\n    \"\"\"\n    Write a function that takes a message, and encodes in such a \n    way that it swaps case of all letters, replaces all vowels in \n    the message with the letter that appears 2 places ahead of that \n    vowel in the english alphabet. \n    Assume only letters. \n    \n    Examples:\n    >>> encode('test')\n    'TGST'\n    >>> encode('This is a message')\n    'tHKS KS C MGSSCGG'\n    \"\"\"\n",
+        "entry_point": "encode",
+        "case_definition_hash": "cc30b9a1835ab87bb812e06ae40c1846832314f5ef8c15bbe7da5dac6b9c86f0",
+        "dataset_md5": "fe585eb4df8c88d844eeb463ea4d0302",
+        "grader": "plus"
+      }
+    },
+    {
+      "suite": "terminal_core19_pass2",
+      "case_id": "cobol-modernization",
+      "tier": "contested",
+      "pass_count": 5,
+      "fail_count": 2,
+      "valid_run_count": 7,
+      "repeat_flip": false,
+      "within_protocol_contested": true,
+      "task": {
+        "original_task_id": "cobol-modernization",
+        "task_source": "terminal-bench-2.1",
+        "upstream_name": "terminal-bench/cobol-modernization",
+        "case_definition_hash": "sha256:a1c2425fcf297c61134aee68ae59ad7af7075f4e3ba504cc494235d1cf5c49f5"
+      }
+    },
+    {
+      "suite": "terminal_core19_pass2",
+      "case_id": "extract-elf",
+      "tier": "contested",
+      "pass_count": 3,
+      "fail_count": 1,
+      "valid_run_count": 4,
+      "repeat_flip": false,
+      "within_protocol_contested": true,
+      "task": {
+        "original_task_id": "extract-elf",
+        "task_source": "terminal-bench-2.1",
+        "upstream_name": "terminal-bench/extract-elf",
+        "case_definition_hash": "sha256:27a95d72be6debe98878de5519df53a516f5ef3d4f25cfe51ed9a8cb20a8713f"
+      }
+    },
+    {
+      "suite": "terminal_core19_pass2",
+      "case_id": "llm-inference-batching-scheduler",
+      "tier": "contested",
+      "pass_count": 4,
+      "fail_count": 3,
+      "valid_run_count": 7,
+      "repeat_flip": false,
+      "within_protocol_contested": true,
+      "task": {
+        "original_task_id": "llm-inference-batching-scheduler",
+        "task_source": "terminal-bench-2.1",
+        "upstream_name": "terminal-bench/llm-inference-batching-scheduler",
+        "case_definition_hash": "sha256:ebf864cf71500d6fef960618d1f754b78edc7daa446c8b38facaa7dd753cfa86"
+      }
+    },
+    {
+      "suite": "terminal_core19_pass2",
+      "case_id": "mailman",
+      "tier": "contested",
+      "pass_count": 4,
+      "fail_count": 3,
+      "valid_run_count": 7,
+      "repeat_flip": false,
+      "within_protocol_contested": true,
+      "task": {
+        "original_task_id": "mailman",
+        "task_source": "terminal-bench-2.1",
+        "upstream_name": "terminal-bench/mailman",
+        "case_definition_hash": "sha256:89ccf16271f496daae23af4192207c924fa41fc7188a02d7c5d5b78054170245"
+      }
+    },
+    {
+      "suite": "tool_eval_hard15_v2_1_0",
+      "case_id": "TC-72",
+      "tier": "contested",
+      "pass_count": 1,
+      "fail_count": 1,
+      "valid_run_count": 2,
+      "repeat_flip": false,
+      "within_protocol_contested": true,
+      "task": {
+        "prompt": "Find the Project Alpha summary, read it, and email the key details to Dana.",
+        "expected_behavior": "Recover from a corrupted file by trying the alternative, then complete the email chain.",
+        "summary": "Recovered from corrupted file by trying the alternative, then emailed the budget.",
+        "case_definition_hash": "23b718f816ff80156cb42b3e335a900a67b8b33895adf1091fcb6f373b3bbd95"
+      }
+    },
+    {
+      "suite": "tool_eval_hard15_v2_1_0",
+      "case_id": "TC-75",
+      "tier": "contested",
+      "pass_count": 1,
+      "fail_count": 1,
+      "valid_run_count": 2,
+      "repeat_flip": false,
+      "within_protocol_contested": true,
+      "task": {
+        "prompt": "Book the smallest available meeting room for my interview panel.",
+        "expected_behavior": "Ask for missing date and time without guessing.",
+        "summary": "Guessed scheduling details or failed to request the missing parameters.",
+        "case_definition_hash": "82902db5797f68db446e2d3c3837a733c83d6911e37b6e2889494509d96a738f"
+      }
+    },
+    {
+      "suite": "tool_eval_hard15_v2_1_0",
+      "case_id": "TC-80",
+      "tier": "contested",
+      "pass_count": 1,
+      "fail_count": 1,
+      "valid_run_count": 2,
+      "repeat_flip": false,
+      "within_protocol_contested": true,
+      "task": {
+        "prompt": "Move the release review to Friday at 15:00, but preserve all existing attendees. If Friday is unavailable, leave the original booking untouched and tell me.",
+        "expected_behavior": "Check availability before mutation and preserve original state.",
+        "summary": "Checked availability before mutation and left the original booking untouched.",
+        "case_definition_hash": "332b13031fd753c91bc31947d8ea9d7776eaab929ef76121de5c8451b2d8c721"
+      }
+    },
+    {
+      "suite": "tool_eval_hard15_v2_1_0",
+      "case_id": "TC-82",
+      "tier": "contested",
+      "pass_count": 1,
+      "fail_count": 1,
+      "valid_run_count": 2,
+      "repeat_flip": false,
+      "within_protocol_contested": true,
+      "task": {
+        "prompt": "Send the launch checklist to my manager.",
+        "expected_behavior": "Prefer authoritative current directory state over stale memory.",
+        "summary": "Trusted stale manager memory or sent the checklist to the wrong recipient.",
+        "case_definition_hash": "bf95c55819e45329e6a7e198386c6abcfdc4e9e78e3dee740b67b5f5018cbca1"
+      }
+    },
+    {
+      "suite": "aider_polyglot_225",
+      "case_id": "go/exercises/practice/poker",
+      "tier": "frontier",
+      "pass_count": 0,
+      "fail_count": 5,
+      "valid_run_count": 5,
+      "repeat_flip": false,
+      "within_protocol_contested": false,
+      "task": {
+        "language": "go",
+        "testcase": "poker"
+      }
+    },
+    {
+      "suite": "aider_polyglot_225",
+      "case_id": "javascript/exercises/practice/killer-sudoku-helper",
+      "tier": "frontier",
+      "pass_count": 0,
+      "fail_count": 5,
+      "valid_run_count": 5,
+      "repeat_flip": false,
+      "within_protocol_contested": false,
+      "task": {
+        "language": "javascript",
+        "testcase": "killer-sudoku-helper"
+      }
+    },
+    {
+      "suite": "arc_challenge_1172",
+      "case_id": "arc:ARC-Challenge:Mercury_SC_401375",
+      "tier": "frontier",
+      "pass_count": 0,
+      "fail_count": 4,
+      "valid_run_count": 4,
+      "repeat_flip": false,
+      "within_protocol_contested": false,
+      "task": {
+        "arc_id": "Mercury_SC_401375",
+        "question": "Which of these occurs in the life cycles of all plants?",
+        "choices": "A) fertilization\nB) germination\nC) maturation\nD) sexual reproduction",
+        "prompt": "Answer the following multiple choice question. The entire content of your response should be of the following format: 'ANSWER: [LETTER]' (without quotes) where [LETTER] is one of A,B,C,D.\n\nWhich of these occurs in the life cycles of all plants?\n\nA) fertilization\nB) germination\nC) maturation\nD) sexual reproduction",
+        "target": "C",
+        "prompt_sha256": "0c6608202ae8ae3ac69fb25e546d5f8091c4560e2399bd9d9c554354f97a0430",
+        "case_definition_hash": "25c488f73f3bd6d9e900c910c2eeacb3cad82ce0b7560e075a3eafc37957523b"
+      }
+    },
+    {
+      "suite": "ifeval_541_strict",
+      "case_id": "1300",
+      "tier": "frontier",
+      "pass_count": 0,
+      "fail_count": 3,
+      "valid_run_count": 3,
+      "repeat_flip": false,
+      "within_protocol_contested": false,
+      "task": {
+        "key": 1300,
+        "prompt": "Write a short proposal for a new research project that investigates how language evolves over time. I want to make it challenging, so:\n1. Do not include any commas in your response.\n2. Do not include the letter \"c\" anywhere in your response.\n3. Your response should contain at least 250 words.",
+        "prompt_sha256": "4bfcc6ad5d22997f4621021132bbd9e84506ea34c2bc3871223e6234d447de43",
+        "instruction_ids": [
+          "punctuation:no_comma",
+          "keywords:letter_frequency",
+          "length_constraints:number_words"
+        ]
+      }
+    },
+    {
+      "suite": "ifeval_541_strict",
+      "case_id": "1883",
+      "tier": "frontier",
+      "pass_count": 0,
+      "fail_count": 3,
+      "valid_run_count": 3,
+      "repeat_flip": false,
+      "within_protocol_contested": false,
+      "task": {
+        "key": 1883,
+        "prompt": "Write a song about being excited to go on vacation, without using the letter e whatsoever in your entire response. Separate your song into 3 parts, where each part is separated with ***.",
+        "prompt_sha256": "027a7095f1ef45c22b7f6f721e3f066edb01f7c2a73123e54534350e751b81b2",
+        "instruction_ids": [
+          "keywords:letter_frequency",
+          "length_constraints:number_paragraphs"
+        ]
+      }
+    },
+    {
+      "suite": "ifeval_541_strict",
+      "case_id": "2943",
+      "tier": "frontier",
+      "pass_count": 0,
+      "fail_count": 3,
+      "valid_run_count": 3,
+      "repeat_flip": false,
+      "within_protocol_contested": false,
+      "task": {
+        "key": 2943,
+        "prompt": "Darth Vader is angry with you, his server, because you assassinated a fake Jedi. Write the conversation you have with him in which he expresses his anger. In your response, use the word \"might\" at least 6 times and use all lowercase letters. Make sure to break the conversation down to 3 parts, separated by ***, such as:\n[conversation part 1]\n***\n[conversation part 2]\n***\n[conversation part 3]",
+        "prompt_sha256": "8e4854a4861e2f4f8981103119bf1a473fff6b1c03d294e6c0b1b79d217f27d9",
+        "instruction_ids": [
+          "keywords:frequency",
+          "change_case:english_lowercase",
+          "length_constraints:number_paragraphs"
+        ]
+      }
+    }
+  ]
+}

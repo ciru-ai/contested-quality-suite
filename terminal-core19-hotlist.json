@@ -1,0 +1,53 @@
+{
+  "schema_version": 1,
+  "id": "qwen38-contested-terminal-core19-v1",
+  "version": "1.0.0",
+  "name": "Qwen3.8 contested Terminal-Bench Core-19 subset",
+  "description": "Original Core-19 task contents and verifier hashes; selected by complete-run pass/fail disagreement.",
+  "sources": {
+    "terminal-bench-2.1": {
+      "task_root": "bundle/vendor/terminal-bench-mini/tasks",
+      "dataset": "terminal-bench/terminal-bench-2-1",
+      "version": "2.1",
+      "repository": "https://github.com/harbor-framework/terminal-bench-2-1.git",
+      "revision": "5c8eadf1f393183288fa08b8f73ca9a469cc5e00"
+    }
+  },
+  "tiers": {
+    "full": [
+      "cobol-modernization",
+      "extract-elf",
+      "llm-inference-batching-scheduler",
+      "mailman"
+    ],
+    "smoke": [
+      "cobol-modernization"
+    ]
+  },
+  "tasks": {
+    "cobol-modernization": {
+      "source": "terminal-bench-2.1",
+      "upstream_name": "terminal-bench/cobol-modernization",
+      "upstream_digest": "sha256:e03aa03965eee48c9f772d566ff9bcd741fceeac9693123f82a13fdd46be0d88",
+      "content_sha256": "sha256:a1c2425fcf297c61134aee68ae59ad7af7075f4e3ba504cc494235d1cf5c49f5"
+    },
+    "extract-elf": {
+      "source": "terminal-bench-2.1",
+      "upstream_name": "terminal-bench/extract-elf",
+      "upstream_digest": "sha256:1ef31d566be4fe3459d5368621ae7ef7a31b23ef675737e473bbc43c8c7b3fce",
+      "content_sha256": "sha256:27a95d72be6debe98878de5519df53a516f5ef3d4f25cfe51ed9a8cb20a8713f"
+    },
+    "llm-inference-batching-scheduler": {
+      "source": "terminal-bench-2.1",
+      "upstream_name": "terminal-bench/llm-inference-batching-scheduler",
+      "upstream_digest": "sha256:a3bf47589118daec5124fe3689b4439802c805b2f4ed9d402a48ae73ca2fea67",
+      "content_sha256": "sha256:ebf864cf71500d6fef960618d1f754b78edc7daa446c8b38facaa7dd753cfa86"
+    },
+    "mailman": {
+      "source": "terminal-bench-2.1",
+      "upstream_name": "terminal-bench/mailman",
+      "upstream_digest": "sha256:831b3ed00807153963c05f91599443e4839099521d1d56db811c5547ab280dbe",
+      "content_sha256": "sha256:89ccf16271f496daae23af4192207c924fa41fc7188a02d7c5d5b78054170245"
+    }
+  }
+}

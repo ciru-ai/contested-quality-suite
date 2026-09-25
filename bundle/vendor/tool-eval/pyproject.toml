@@ -1,0 +1,105 @@
+[build-system]
+requires = ["setuptools>=68", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "tool-eval-bench"
+version = "2.1.0"
+description = "Agentic tool-call benchmark for LLM serving stacks (vLLM, LiteLLM, llama.cpp)"
+readme = "README.md"
+license = {text = "MIT"}
+requires-python = ">=3.11"
+authors = [{ name = "SeraphimSerapis" }]
+keywords = ["llm", "benchmark", "tool-calling", "vllm", "evaluation", "agentic"]
+classifiers = [
+  "Development Status :: 5 - Production/Stable",
+  "Intended Audience :: Developers",
+  "Intended Audience :: Science/Research",
+  "License :: OSI Approved :: MIT License",
+  "Programming Language :: Python :: 3",
+  "Programming Language :: Python :: 3.11",
+  "Programming Language :: Python :: 3.12",
+  "Programming Language :: Python :: 3.13",
+  "Topic :: Scientific/Engineering :: Artificial Intelligence",
+  "Typing :: Typed",
+]
+dependencies = [
+  "httpx>=0.28.0",
+  "python-dotenv>=1.1.0",
+  "pyyaml>=6.0",
+  "rich>=14.0.0",
+]
+
+[project.optional-dependencies]
+perf = [
+  "llama-benchy>=0.3.5",
+]
+hf = [
+  "datasets>=3.0.0",
+]
+dev = [
+  "pytest>=8.4.0",
+  "pytest-asyncio>=0.24.0",
+  "pytest-cov>=6.1.0",
+  "ruff>=0.12.0",
+  "pre-commit>=4.0.0",
+]
+
+[project.scripts]
+tool-eval-bench = "tool_eval_bench.cli.bench:main"
+
+[project.urls]
+Homepage = "https://github.com/SeraphimSerapis/tool-eval-bench"
+Repository = "https://github.com/SeraphimSerapis/tool-eval-bench"
+Documentation = "https://github.com/SeraphimSerapis/tool-eval-bench#readme"
+Issues = "https://github.com/SeraphimSerapis/tool-eval-bench/issues"
+
+[tool.setuptools]
+package-dir = {"" = "src"}
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.ruff]
+line-length = 100
+target-version = "py311"
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "W", "B", "S"]
+ignore = [
+    "E501",   # Line too long — 500+ pre-existing violations; enforced gradually
+    "S105",   # Hardcoded password — false positives on enum values / env flags
+    "S311",   # Pseudo-random generators — used for reproducible benchmarking, not crypto
+    "S310",   # URL audit — URLs come from user-provided CLI args
+    "S607",   # Partial executable path — intentional (`git`)
+]
+
+[tool.ruff.lint.per-file-ignores]
+# Tests use assert statements extensively — suppress S101
+"tests/**" = ["S101", "S108"]
+
+[tool.pytest.ini_options]
+pythonpath = ["src"]
+asyncio_mode = "auto"
+filterwarnings = [
+    "ignore::pytest.PytestUnraisableExceptionWarning",
+    "ignore:unclosed event loop:ResourceWarning",
+    "ignore:coroutine .* was never awaited:RuntimeWarning",
+]
+
+[tool.coverage.run]
+branch = true
+source = ["src"]
+omit = [
+    "src/tool_eval_bench/runner/llama_benchy.py",
+]
+
+[tool.coverage.report]
+show_missing = true
+exclude_lines = [
+    "pragma: no cover",
+    "def __repr__",
+    "if __name__ == .__main__.:",
+    "raise NotImplementedError",
+    "if TYPE_CHECKING:",
+]

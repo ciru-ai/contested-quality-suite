@@ -1,0 +1,563 @@
+"""CLI sub-commands: run history listing, diff, and comparison.
+
+Extracted from bench.py (CODE-02) to keep each module focused.
+"""
+
+from __future__ import annotations
+
+import sys
+
+from rich.console import Console
+
+
+def _extract_context_summary(run: dict) -> str:
+    """Extract a short context summary string from metadata.
+
+    Gracefully handles old runs with sparse or missing metadata.
+    """
+    metadata = run.get("metadata") or {}
+    config = run.get("config") or {}
+    parts: list[str] = []
+
+    # Tool version
+    version = metadata.get("tool_version")
+    if version:
+        parts.append(f"v{version}")
+
+    # Backend
+    backend = metadata.get("backend") or config.get("backend")
+    if backend:
+        parts.append(backend)
+
+    # Engine
+    engine_name = metadata.get("engine_name")
+    engine_version = metadata.get("engine_version")
+    if engine_name:
+        s = engine_name
+        if engine_version:
+            s += f" {engine_version}"
+        parts.append(s)
+
+    # Temperature (only if non-default)
+    temp = metadata.get("temperature")
+    if temp is not None and temp != 0.0:
+        parts.append(f"t={temp}")
+
+    # Quantization
+    quant = metadata.get("quantization")
+    if quant:
+        parts.append(quant)
+
+    return "  ".join(parts) if parts else ""
+
+
+def _extract_context_panel(run: dict) -> list[str]:
+    """Extract context lines for detailed comparison panels.
+
+    Returns list of Rich-formatted strings, or empty list for old runs.
+    """
+    metadata = run.get("metadata") or {}
+    config = run.get("config") or {}
+    lines: list[str] = []
+
+    version = metadata.get("tool_version")
+    if version:
+        git_sha = metadata.get("git_sha", "")
+        sha_str = f" {git_sha}" if git_sha else ""
+        lines.append(f"  [dim]tool-eval-bench:[/] v{version}{sha_str}")
+
+    engine_name = metadata.get("engine_name")
+    if engine_name:
+        engine_version = metadata.get("engine_version", "")
+        lines.append(f"  [dim]Engine:[/] {engine_name} {engine_version}")
+
+    max_model_len = metadata.get("max_model_len")
+    if max_model_len:
+        lines.append(f"  [dim]Context:[/] {max_model_len:,} tokens")
+
+    quant = metadata.get("quantization")
+    if quant:
+        lines.append(f"  [dim]Quantization:[/] {quant}")
+
+    model_root = metadata.get("server_model_root")
+    model_api = metadata.get("model") or config.get("model")
+    if model_root and model_root != model_api:
+        lines.append(f"  [dim]Model root:[/] {model_root}")
+
+    temp = metadata.get("temperature")
+    if temp is not None:
+        lines.append(f"  [dim]Temperature:[/] {temp}")
+
+    seed = metadata.get("seed")
+    if seed is not None:
+        lines.append(f"  [dim]Seed:[/] {seed}")
+
+    thinking = metadata.get("thinking_enabled")
+    if thinking is not None:
+        lines.append(f"  [dim]Thinking:[/] {'enabled' if thinking else 'disabled'}")
+
+    hostname = metadata.get("hostname")
+    if hostname:
+        lines.append(f"  [dim]Host:[/] {hostname}")
+
+    return lines
+
+
+def print_history(console: Console) -> None:
+    """List recent benchmark runs from SQLite."""
+    from rich.table import Table
+
+    from tool_eval_bench.storage.db import RunRepository
+
+    repo = RunRepository()
+    runs = repo.list(limit=15)
+
+    if not runs:
+        console.print("\n  [dim]No previous runs found.[/]\n")
+        return
+
+    table = Table(
+        title="[bold]Recent Benchmark Runs[/]",
+        show_header=True,
+        header_style="bold",
+        border_style="bright_blue",
+        expand=True,
+    )
+    table.add_column("Run ID", min_width=30, no_wrap=True)
+    table.add_column("Model", min_width=20)
+    table.add_column("Score", justify="right", width=8)
+    table.add_column("Rating", min_width=16)
+    table.add_column("Context", min_width=25, no_wrap=True)
+    table.add_column("Date", width=20)
+
+    for run in runs:
+        scores = run.get("scores") or {}
+        score = scores.get("final_score", "?")
+        rating = scores.get("rating", "")
+        created = run.get("created_at", "?")[:19]
+        context = _extract_context_summary(run)
+        table.add_row(
+            f"[dim]{run['run_id']}[/]",
+            run.get("model", "?"),
+            f"[bold]{score}[/]",
+            rating,
+            f"[dim]{context}[/]" if context else "[dim]—[/]",
+            f"[dim]{created}[/]",
+        )
+
+    console.print()
+    console.print(table)
+    console.print()
+
+
+def print_diff(
+    console: Console,
+    current_results: list,  # list of ScenarioResult
+    diff_run_id: str,
+) -> None:
+    """Compare current results against a previous run and print a diff table."""
+    from rich.panel import Panel
+    from rich.table import Table
+
+    from tool_eval_bench.storage.db import RunRepository
+
+    repo = RunRepository()
+
+    # Resolve 'latest' to actual run ID
+    if diff_run_id.lower() == "latest":
+        latest = repo.get_latest()
+        if not latest:
+            console.print("\n  [yellow]No previous runs found for comparison.[/]\n")
+            return
+        diff_run_id = latest["run_id"]
+
+    prev_results = repo.get_scenario_results(diff_run_id)
+    if prev_results is None:
+        console.print(f"\n  [yellow]Run '{diff_run_id}' not found in database.[/]\n")
+        return
+
+    # Build lookup: scenario_id → previous result dict
+    prev_map = {r["scenario_id"]: r for r in prev_results}
+
+    # Stats
+    improved = 0
+    regressed = 0
+    unchanged = 0
+    new_scenarios = 0
+
+    table = Table(
+        title=f"[bold]Diff vs {diff_run_id[:30]}…[/]",
+        show_header=True,
+        header_style="bold",
+        border_style="bright_cyan",
+        expand=True,
+    )
+    table.add_column("ID", width=6, no_wrap=True)
+    table.add_column("Scenario", min_width=20, no_wrap=True)
+    table.add_column("Prev", justify="center", width=6)
+    table.add_column("→", justify="center", width=3)
+    table.add_column("Now", justify="center", width=6)
+    table.add_column("Δ", justify="center", width=6)
+    table.add_column("Time Δ", justify="right", width=8)
+    table.add_column("Note", ratio=1)
+
+    status_symbols = {"pass": "✅", "partial": "⚠️", "fail": "❌"}
+
+    for cr in current_results:
+        sc_id = cr.scenario_id
+        prev = prev_map.get(sc_id)
+
+        cur_pts = cr.points
+        cur_status = cr.status.value
+        cur_dur = cr.duration_seconds
+
+        if prev is None:
+            new_scenarios += 1
+            table.add_row(
+                sc_id,
+                cr.summary[:30],
+                "[dim]—[/]",
+                "→",
+                f"[bold]{cur_pts}[/]/2",
+                "[dim]new[/]",
+                "",
+                "[dim]new scenario[/]",
+            )
+            continue
+
+        prev_pts = prev.get("points", 0)
+        prev_status = prev.get("status", "fail")
+        prev_dur = prev.get("duration_seconds", 0.0)
+
+        delta = cur_pts - prev_pts
+        dur_delta = cur_dur - prev_dur
+
+        if delta > 0:
+            improved += 1
+            delta_str = f"[bold green]+{delta}[/]"
+            note = "[green]✅ improved[/]"
+        elif delta < 0:
+            regressed += 1
+            delta_str = f"[bold red]{delta}[/]"
+            note = "[red]❌ regressed[/]"
+        else:
+            unchanged += 1
+            delta_str = "[dim]=[/]"
+            note = ""
+
+        dur_sign = "+" if dur_delta >= 0 else ""
+        dur_str = f"[dim]{dur_sign}{dur_delta:.1f}s[/]" if prev_dur > 0 else ""
+
+        prev_sym = status_symbols.get(prev_status, "?")
+        cur_sym = status_symbols.get(cur_status, "?")
+
+        table.add_row(
+            sc_id,
+            cr.summary[:30] if delta != 0 else f"[dim]{cr.summary[:30]}[/]",
+            f"[dim]{prev_sym} {prev_pts}[/]",
+            "→",
+            f"{cur_sym} [bold]{cur_pts}[/]",
+            delta_str,
+            dur_str,
+            note,
+        )
+
+    console.print()
+    console.print(table)
+
+    # Summary line
+    cur_total = sum(r.points for r in current_results)
+    prev_total = sum(
+        r.get("points", 0)
+        for r in prev_results
+        if r["scenario_id"] in {cr.scenario_id for cr in current_results}
+    )
+    total_delta = cur_total - prev_total
+    delta_color = "green" if total_delta > 0 else ("red" if total_delta < 0 else "dim")
+    delta_sign = "+" if total_delta > 0 else ""
+
+    summary = (
+        f"  [green]↑ {improved} improved[/]  "
+        f"[red]↓ {regressed} regressed[/]  "
+        f"[dim]= {unchanged} unchanged[/]"
+    )
+    if new_scenarios:
+        summary += f"  [cyan]+ {new_scenarios} new[/]"
+    summary += f"\n  [bold]Points: {prev_total} → {cur_total} ([{delta_color}]{delta_sign}{total_delta}[/])[/]"
+
+    console.print(Panel(summary, border_style="bright_cyan", padding=(0, 2)))
+    console.print()
+
+
+def compare_runs(console: Console, run_id_a: str, run_id_b: str) -> None:
+    """Compare two stored runs from SQLite and print a diff table.
+
+    run_id_a is treated as the baseline, run_id_b as the new run.
+    Supports 'latest' as a shorthand for the most recent run.
+    """
+    from rich.panel import Panel
+    from rich.table import Table
+
+    from tool_eval_bench.storage.db import RunRepository
+
+    repo = RunRepository()
+
+    def _resolve(rid: str) -> tuple[str, dict]:
+        if rid.lower() == "latest":
+            run = repo.get_latest()
+            if not run:
+                console.print("\n  [red]No runs found in database.[/]\n")
+                sys.exit(1)
+            return run["run_id"], run
+        run = repo.get(rid)
+        if not run:
+            console.print(f"\n  [red]Run '{rid}' not found in database.[/]\n")
+            console.print("  [dim]Use --history to list available runs.[/]\n")
+            sys.exit(1)
+        return rid, run
+
+    id_a, run_a = _resolve(run_id_a)
+    id_b, run_b = _resolve(run_id_b)
+
+    results_a = run_a.get("scores", {}).get("scenario_results", [])
+    results_b = run_b.get("scores", {}).get("scenario_results", [])
+
+    if not results_a or not results_b:
+        console.print("\n  [red]One or both runs have no scenario results.[/]\n")
+        return
+
+    # Warn if runs have different configurations
+    fp_a = run_a.get("config", {}).get("config_fingerprint")
+    fp_b = run_b.get("config", {}).get("config_fingerprint")
+    if fp_a and fp_b and fp_a != fp_b:
+        diffs: list[str] = []
+        cfg_a, cfg_b = run_a.get("config", {}), run_b.get("config", {})
+        for key in ("scenario_count", "backend", "temperature", "seed", "error_rate"):
+            va, vb = cfg_a.get(key), cfg_b.get(key)
+            if va != vb:
+                diffs.append(f"{key} ({va} vs {vb})")
+        diff_str = ", ".join(diffs) if diffs else "config fingerprints differ"
+        console.print(
+            Panel(
+                f"  [bold yellow]⚠ These runs have different configurations[/]\n"
+                f"  [dim]{diff_str}[/]\n"
+                f"  [dim]McNemar results may not be meaningful.[/]",
+                border_style="yellow",
+            )
+        )
+
+    model_a = run_a.get("config", {}).get("model", "?")
+    model_b = run_b.get("config", {}).get("model", "?")
+
+    # Header with run context (issue #6)
+    ctx_lines_a = _extract_context_panel(run_a)
+    ctx_lines_b = _extract_context_panel(run_b)
+
+    header_lines = [
+        f"  [bold]A (baseline):[/] {id_a[:40]}  [dim]model={model_a}[/]",
+    ]
+    if ctx_lines_a:
+        header_lines.extend(ctx_lines_a)
+    header_lines.append(f"  [bold]B (current):[/]  {id_b[:40]}  [dim]model={model_b}[/]")
+    if ctx_lines_b:
+        header_lines.extend(ctx_lines_b)
+
+    console.print()
+    console.print(
+        Panel(
+            "\n".join(header_lines),
+            title="[bold]📊 Run Comparison[/]",
+            border_style="bright_cyan",
+        )
+    )
+
+    # Build lookup: scenario_id → result dict
+    map_a = {r["scenario_id"]: r for r in results_a}
+    map_b = {r["scenario_id"]: r for r in results_b}
+    all_ids = list(
+        dict.fromkeys([r["scenario_id"] for r in results_a] + [r["scenario_id"] for r in results_b])
+    )
+
+    status_symbols = {"pass": "✅", "partial": "⚠️", "fail": "❌"}
+    improved = regressed = unchanged = 0
+
+    table = Table(
+        show_header=True,
+        header_style="bold",
+        border_style="bright_cyan",
+        expand=True,
+    )
+    table.add_column("ID", width=6, no_wrap=True)
+    table.add_column("A", justify="center", width=8)
+    table.add_column("→", justify="center", width=3)
+    table.add_column("B", justify="center", width=8)
+    table.add_column("Δ", justify="center", width=6)
+    table.add_column("Time Δ", justify="right", width=8)
+    table.add_column("Note", ratio=1)
+
+    for sc_id in all_ids:
+        ra = map_a.get(sc_id)
+        rb = map_b.get(sc_id)
+
+        if ra and not rb:
+            table.add_row(
+                sc_id,
+                f"[dim]{ra.get('points', 0)}/2[/]",
+                "→",
+                "[dim]—[/]",
+                "",
+                "",
+                "[dim]removed in B[/]",
+            )
+            continue
+        if rb and not ra:
+            table.add_row(
+                sc_id,
+                "[dim]—[/]",
+                "→",
+                f"[bold]{rb.get('points', 0)}/2[/]",
+                "[dim]new[/]",
+                "",
+                "[dim]new in B[/]",
+            )
+            continue
+
+        pts_a, pts_b = ra.get("points", 0), rb.get("points", 0)
+        st_a, st_b = ra.get("status", "fail"), rb.get("status", "fail")
+        dur_a, dur_b = ra.get("duration_seconds", 0.0), rb.get("duration_seconds", 0.0)
+
+        delta = pts_b - pts_a
+        if delta > 0:
+            improved += 1
+            delta_str = f"[bold green]+{delta}[/]"
+            note = "[green]improved[/]"
+        elif delta < 0:
+            regressed += 1
+            delta_str = f"[bold red]{delta}[/]"
+            note = "[red]regressed[/]"
+        else:
+            unchanged += 1
+            delta_str = "[dim]=[/]"
+            note = ""
+
+        dur_delta = dur_b - dur_a
+        dur_sign = "+" if dur_delta >= 0 else ""
+        dur_str = f"[dim]{dur_sign}{dur_delta:.1f}s[/]" if dur_a > 0 else ""
+
+        sym_a, sym_b = status_symbols.get(st_a, "?"), status_symbols.get(st_b, "?")
+
+        table.add_row(
+            sc_id,
+            f"[dim]{sym_a} {pts_a}[/]",
+            "→",
+            f"{sym_b} [bold]{pts_b}[/]",
+            delta_str,
+            dur_str,
+            note,
+        )
+
+    console.print()
+    console.print(table)
+
+    # Summary
+    total_a = sum(r.get("points", 0) for r in results_a)
+    total_b = sum(r.get("points", 0) for r in results_b)
+    total_delta = total_b - total_a
+    delta_color = "green" if total_delta > 0 else ("red" if total_delta < 0 else "dim")
+    delta_sign = "+" if total_delta > 0 else ""
+
+    score_a = run_a.get("scores", {}).get("final_score", "?")
+    score_b = run_b.get("scores", {}).get("final_score", "?")
+
+    summary = (
+        f"  [green]↑ {improved} improved[/]  "
+        f"[red]↓ {regressed} regressed[/]  "
+        f"[dim]= {unchanged} unchanged[/]\n"
+        f"  [bold]Points: {total_a} → {total_b} ([{delta_color}]{delta_sign}{total_delta}[/])[/]\n"
+        f"  [bold]Score:  {score_a} → {score_b}[/]"
+    )
+
+    console.print(Panel(summary, border_style="bright_cyan", padding=(0, 2)))
+
+    # McNemar's significance test — paired comparison of pass/fail outcomes
+    # Only considers scenarios present in both runs.
+    _print_mcnemar(console, map_a, map_b, all_ids)
+
+    console.print()
+    repo.close()
+
+
+def _print_mcnemar(
+    console: Console,
+    map_a: dict[str, dict],
+    map_b: dict[str, dict],
+    all_ids: list[str],
+) -> None:
+    """Compute and display McNemar's test for statistical significance.
+
+    Uses a 2×2 contingency table of pass/not-pass outcomes for scenarios
+    present in both runs.  The chi-squared statistic (with continuity
+    correction) is computed without scipy — only stdlib math is needed.
+
+    Interpretation:
+        p < 0.05  → statistically significant difference
+        p >= 0.05 → no significant difference (could be noise)
+    """
+    import math
+
+    # Build contingency table
+    # b = A pass, B fail (B regressed)
+    # c = A fail, B pass (B improved)
+    b = 0  # A pass & B not-pass
+    c = 0  # A not-pass & B pass
+
+    for sc_id in all_ids:
+        ra = map_a.get(sc_id)
+        rb = map_b.get(sc_id)
+        if not ra or not rb:
+            continue  # skip scenarios not in both runs
+
+        a_pass = ra.get("status") == "pass"
+        b_pass = rb.get("status") == "pass"
+
+        if a_pass and not b_pass:
+            b += 1
+        elif not a_pass and b_pass:
+            c += 1
+
+    n_discordant = b + c
+
+    if n_discordant == 0:
+        console.print(
+            "  [dim]McNemar: no discordant pairs — runs are identical "
+            "(no significance test needed).[/]"
+        )
+        return
+
+    # McNemar's chi-squared with continuity correction
+    chi2 = (abs(b - c) - 1) ** 2 / (b + c) if (b + c) > 0 else 0.0
+
+    # Survival function for chi-squared with df=1 (no scipy needed)
+    # P(X > chi2) = 1 - Phi(sqrt(chi2)) + Phi(-sqrt(chi2))
+    # Using the complementary error function: erfc(x/sqrt(2))/2
+    p_value = math.erfc(math.sqrt(chi2 / 2)) if chi2 > 0 else 1.0
+
+    sig = p_value < 0.05
+    direction = "B" if c > b else "A" if b > c else "neither"
+
+    # Format output
+    sig_str = (
+        f"[bold green]significant (p={p_value:.4f})[/]"
+        if sig
+        else f"[dim]not significant (p={p_value:.4f})[/]"
+    )
+
+    parts = [
+        f"  [bold]McNemar's test:[/] {sig_str}",
+        f"  [dim]Discordant pairs: {n_discordant} (A→fail: {b}, A→pass: {c}, χ²={chi2:.2f})[/]",
+    ]
+    if sig:
+        parts.append(f"  [bold]→ {direction} is statistically better[/]")
+
+    console.print()
+    console.print("\n".join(parts))
