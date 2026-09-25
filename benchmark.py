@@ -73,6 +73,23 @@ def image_id(tag: str) -> str | None:
     return result.stdout.strip() if result.returncode == 0 else None
 
 
+def add_nixos_cpp_runtime() -> None:
+    """Make Harbor's binary Python extensions load on NixOS hosts."""
+    if not Path("/etc/NIXOS").is_file():
+        return
+    gcc = shutil.which("gcc")
+    if not gcc:
+        raise RuntimeError("NixOS Terminal setup requires gcc to locate libstdc++.so.6")
+    result = subprocess.run([gcc, "-print-file-name=libstdc++.so.6"],
+                            capture_output=True, text=True, check=True)
+    library = Path(result.stdout.strip())
+    if not library.is_file():
+        raise RuntimeError("NixOS Terminal setup could not locate libstdc++.so.6")
+    paths = [part for part in os.environ.get("LD_LIBRARY_PATH", "").split(os.pathsep) if part]
+    if str(library.parent) not in paths:
+        os.environ["LD_LIBRARY_PATH"] = os.pathsep.join([str(library.parent), *paths])
+
+
 def ensure_setup(names: list[str]) -> None:
     if sys.version_info < (3, 11):
         raise RuntimeError("Python 3.11 or newer is required")
@@ -88,6 +105,7 @@ def ensure_setup(names: list[str]) -> None:
             raise RuntimeError("Docker is installed but this user cannot access the Docker daemon")
         if "terminal_core19_pass2" in names:
             check_space(PROTOCOL["defaults"]["terminal_min_docker_free_gib"])
+            add_nixos_cpp_runtime()
     else:
         docker = None
     if "humaneval_plus_164" in names:
