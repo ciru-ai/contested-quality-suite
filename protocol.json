@@ -1,6 +1,6 @@
 {
   "id": "contested-quality-suite-protocol-v2",
-  "version": "2.0.0",
+  "version": "2.1.0",
   "selection_sha256": "3895748e8bd30b2dc1add1b396310a60bfa8a0f3c6f1a2f8482ec6bcc5948b75",
   "response_caps": {
     "arc_challenge_1172": 256,
@@ -15,6 +15,9 @@
     "terminal_min_docker_free_gib": 12
   },
   "terminal_context_length": "from endpoint metadata or explicit --terminal-context-length",
-  "truncation_policy": "HumanEval+, Terminal, or Tool-Eval responses reaching their explicit output cap are non-scorable. Terminal infrastructure exceptions are non-scorable. Native grading rules and task selections remain unchanged.",
-  "content_sha256": "77af04c36ec4ac548abcfe655f913d92a021486915edea7ea240860765c0bd06"
+  "truncation_policy": "HumanEval+, Terminal, or Tool-Eval responses reaching their explicit output cap are non-scorable. Terminal infrastructure exceptions are non-scorable. Task selections remain unchanged.",
+  "content_sha256": "77af04c36ec4ac548abcfe655f913d92a021486915edea7ea240860765c0bd06",
+  "grader_changes": {
+    "tool_eval_tc80": "Recognize some explicitly negated move/update/reschedule statements while retaining the state and tested affirmative-claim guards. Text matching remains a bounded heuristic and may need manual review."
+  }
 }

@@ -40,7 +40,7 @@ ADAPTER_MODULES = {
 }
 SENSITIVE = ("KEY", "TOKEN", "SECRET", "PASSWORD", "CREDENTIAL")
 LOCKED_INPUT_SHA256 = {
-    "protocol.json": "fb7c60a51f3dd82a9357dcad3dd7756d0199cfd5e6854756013899bebab9d2ae",
+    "protocol.json": "d9a58b586b66db073618dd4bc594d1ad907677dd06ef2053419000d670b63482",
     "selectors/aider-tasks.txt": "04111c1d039977f244bf90d8ed79b14269b086b825638d3f2b0f2b32bf754d61",
     "selectors/arc-challenge.jsonl": "977f6210e66686ea363a203a49819ff6edf0c40fcb9059d42487b19313d2d452",
     "selectors/hermesagent-scenarios.txt": "c759090d2604b4d19f51c43a08fa8ef672cbb257bda1de187008c1b88a0da3fe",

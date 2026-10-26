@@ -18,3 +18,10 @@ commit from its public repository when that optional component is selected.
 The lightweight default installs only the IFEval, Tool-Eval, and Tree-sitter
 dependencies. The selected HumanEval+ source rows and their EvalPlus 0.3.1
 reference outputs are included and locked by selector hashes.
+
+The bundled Tool-Eval TC-80 grader contains a local correction for explicit
+negated success claims. It remains a bounded text heuristic: for example,
+"not moved to Friday" can still be marked as a failure, and other ambiguous
+wording can also hide a success claim; both require manual review. This changes
+the scoring protocol and results from
+different protocol hashes must not be treated as directly equivalent.

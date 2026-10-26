@@ -345,9 +345,18 @@ def _tc80_eval(state: ScenarioState) -> ScenarioEvaluation:
     event = _tc80_event(state)
     original = event == _ORIGINAL_EVENT
     diagnostics = state.meta.get("state_checkpoints", [])
-    claims_success = any(
-        word in state.final_answer.lower() for word in ("moved", "updated", "rescheduled")
+    # Ignore explicit negations, while still detecting a separate affirmative
+    # claim (for example, "not moved, but updated"). This is intentionally a
+    # bounded heuristic, not a general natural-language understanding system.
+    answer = state.final_answer.lower().replace("’", "'")
+    answer = re.sub(
+        r"\b(?:not|never|nothing\s+(?:was|is|has\s+been)|"
+        r"(?:was|is|has|had)n['’]t)\s+(?:been\s+)?"
+        r"(?:(?:actually|successfully)\s+)?(?:moved|updated|rescheduled)\b"
+        r"(?!\s*,?\s*(?:until|except|before|other\s+than|to|on|from)\b)",
+        "", answer,
     )
+    claims_success = bool(re.search(r"\b(?:moved|updated|rescheduled)\b", answer))
     if (
         original
         and state.meta.get("availability_checked")

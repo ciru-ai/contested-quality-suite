@@ -597,7 +597,7 @@
     "tool-eval/src/tool_eval_bench/evals/scenarios_agentic.py": "7a74bb75cd058c136a37050eb8507508e57842abf6caff7e6e55eb2a8fd31e74",
     "tool-eval/src/tool_eval_bench/evals/scenarios_extended.py": "856ae3749f3c6fb52a1e587e6038496e99c4ea22eb3a5c24df47afcfe0b1bba7",
     "tool-eval/src/tool_eval_bench/evals/scenarios_hardmode.py": "61b9c84a091e4edf34566aded5618966b84825f279da0d33256910b055548e48",
-    "tool-eval/src/tool_eval_bench/evals/scenarios_hardmode_expanded.py": "2909271fbe3d927c6715dda59450098d1ee604bb53e4379060f58e59e1b74b45",
+    "tool-eval/src/tool_eval_bench/evals/scenarios_hardmode_expanded.py": "c36d36129e222060fd7cba9d772cf8ff896817dfd8a2c8ecfd5ffafc0fe65bcc",
     "tool-eval/src/tool_eval_bench/evals/scenarios_large_toolset.py": "399971a2ff7366a0aea7148aa708caccdee677609d2cbcd1ab829b6bd0bf0c5d",
     "tool-eval/src/tool_eval_bench/evals/scenarios_planning.py": "11b42c5be8eb2f153bd1b70dc84fe829882529a363bb4ae10baf5ba85265df6b",
     "tool-eval/src/tool_eval_bench/evals/scenarios_structured.py": "2fed4824b9440d1e9a27690f65357d4e13e3767633617375477b6b3f266669e7",
